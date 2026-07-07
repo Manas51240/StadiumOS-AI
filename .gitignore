@@ -1,0 +1,31 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+web_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Python Virtual Env
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+
+# Local databases
+*.db
+stadium_os.db
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE settings
+.vscode/
+
+# Build caches
+.pytest_cache/
+.coverage
+htmlcov/
