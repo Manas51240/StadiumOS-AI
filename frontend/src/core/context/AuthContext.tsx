@@ -30,6 +30,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const autoLoginOrganizer = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/v1/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: 'organizer@fifa.com', password: 'strongpassword123' })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem('stadium_token', data.access_token);
+        setToken(data.access_token);
+        await fetchProfile(data.access_token);
+      } else {
+        setLoading(false);
+      }
+    } catch {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     // Re-hydrate auth state
     const savedToken = localStorage.getItem('stadium_token');
@@ -37,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(savedToken);
       fetchProfile(savedToken);
     } else {
-      setLoading(false);
+      autoLoginOrganizer();
     }
   }, []);
 
