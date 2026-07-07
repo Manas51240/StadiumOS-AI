@@ -5,11 +5,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/core/context/AuthContext';
 import { useAccessibility } from '@/core/context/AccessibilityContext';
-import { Compass, ShieldAlert, Users, LogOut, Eye, Type, Volume2, ChevronRight } from 'lucide-react';
+import { Compass, ShieldAlert, Users, LogOut, Volume2, ChevronRight } from 'lucide-react';
+import A11yControls from './A11yControls';
 
 export default function Header() {
   const { user, logout } = useAuth();
-  const { theme, toggleTheme, fontSize, setFontSize, audioGuideActive, toggleAudioGuide } = useAccessibility();
+  const { toggleTheme, fontSize, setFontSize, audioGuideActive, toggleAudioGuide } = useAccessibility();
   const pathname = usePathname();
 
   const handleFontSizeChange = () => {
@@ -18,7 +19,6 @@ export default function Header() {
     else setFontSize('normal');
   };
 
-  // Convert current pathname into readable breadcrumbs
   const getBreadcrumbs = () => {
     if (pathname === '/') return 'Gateway';
     const clean = pathname.replace('/', '');
@@ -65,9 +65,7 @@ export default function Header() {
             }}>S</span>
             StadiumOS
           </Link>
-
           <ChevronRight size={14} color="var(--text-muted)" />
-          
           <span style={{
             fontSize: '0.85rem',
             color: 'var(--text-secondary)',
@@ -81,7 +79,7 @@ export default function Header() {
           </span>
         </div>
 
-        {/* Navigation Landmark Links */}
+        {/* Navigation Links */}
         {user && (
           <nav aria-label="Main Navigation" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             {(user.role === 'organizer' || user.role === 'security') && (
@@ -94,8 +92,7 @@ export default function Header() {
                   borderRadius: '4px',
                   textDecoration: 'none',
                   fontSize: '0.85rem',
-                  fontWeight: 600,
-                  transition: 'var(--transition-smooth)'
+                  fontWeight: 600
                 }}
               >
                 Dashboard
@@ -114,8 +111,7 @@ export default function Header() {
                 alignItems: 'center',
                 gap: '6px',
                 fontSize: '0.85rem',
-                fontWeight: 600,
-                transition: 'var(--transition-smooth)'
+                fontWeight: 600
               }}
             >
               <Compass size={14} />
@@ -134,8 +130,7 @@ export default function Header() {
                 alignItems: 'center',
                 gap: '6px',
                 fontSize: '0.85rem',
-                fontWeight: 600,
-                transition: 'var(--transition-smooth)'
+                fontWeight: 600
               }}
             >
               <Volume2 size={14} />
@@ -154,8 +149,7 @@ export default function Header() {
                 alignItems: 'center',
                 gap: '6px',
                 fontSize: '0.85rem',
-                fontWeight: 600,
-                transition: 'var(--transition-smooth)'
+                fontWeight: 600
               }}
             >
               <Users size={14} />
@@ -174,8 +168,7 @@ export default function Header() {
                 alignItems: 'center',
                 gap: '6px',
                 fontSize: '0.85rem',
-                fontWeight: 600,
-                transition: 'var(--transition-smooth)'
+                fontWeight: 600
               }}
             >
               <ShieldAlert size={14} />
@@ -186,44 +179,12 @@ export default function Header() {
 
         {/* Quick actions controls */}
         <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-          <button
-            onClick={toggleTheme}
-            className="btn btn-secondary"
-            style={{ padding: '6px 10px', fontSize: '0.8rem' }}
-            title="Toggle contrast theme"
-            aria-label="Toggle Contrast Theme"
-          >
-            <Eye size={14} />
-            <span className="sr-only">Contrast Theme</span>
-          </button>
-          
-          <button
-            onClick={handleFontSizeChange}
-            className="btn btn-secondary"
-            style={{ padding: '6px 10px', fontSize: '0.8rem' }}
-            title="Adjust text size"
-            aria-label="Adjust Text Size"
-          >
-            <Type size={14} />
-            <span className="sr-only">Font Scale</span>
-          </button>
-
-          <button
-            onClick={toggleAudioGuide}
-            className="btn btn-secondary"
-            style={{
-              padding: '6px 10px',
-              fontSize: '0.8rem',
-              borderColor: audioGuideActive ? 'var(--color-primary)' : 'var(--border-glass)',
-              color: audioGuideActive ? 'var(--color-primary)' : 'var(--text-primary)'
-            }}
-            title="Toggle audio guide assistant"
-            aria-label="Toggle Audio Guide"
-          >
-            <Volume2 size={14} />
-            <span className="sr-only">Audio Guide</span>
-          </button>
-
+          <A11yControls
+            toggleTheme={toggleTheme}
+            handleFontSizeChange={handleFontSizeChange}
+            toggleAudioGuide={toggleAudioGuide}
+            audioGuideActive={audioGuideActive}
+          />
           {user && (
             <button
               onClick={logout}

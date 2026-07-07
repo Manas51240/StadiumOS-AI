@@ -3,27 +3,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../../core/context/AuthContext';
 import { useAccessibility } from '../../../core/context/AccessibilityContext';
-import { Send, AlertTriangle, ShieldCheck, Volume2, Cpu, Wrench } from 'lucide-react';
-
-interface ToolCall {
-  function_name: string;
-  arguments: Record<string, any>;
-}
-
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
-  confidence?: number;
-  flagged?: boolean;
-  flag_reason?: string;
-  suggested_actions?: string[];
-  intent?: string;
-  tool_calls?: ToolCall[];
-}
+import { Send } from 'lucide-react';
+import MessageItem, { Message } from './MessageItem';
+import { assistantService } from '../../../services/api';
 
 export default function ChatWidget() {
-  const { apiFetch, user } = useAuth();
+  const { user } = useAuth();
   const { announce, audioGuideActive } = useAccessibility();
+  
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
@@ -59,17 +46,13 @@ export default function ChatWidget() {
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setLoading(true);
-    
     announce(`User sent query: ${messageText}`);
 
     try {
-      const response = await apiFetch('/api/v1/assistant/chat', {
-        method: 'POST',
-        body: JSON.stringify({
-          message: messageText,
-          language: language,
-          conversation_id: 'active-session-wc-2026'
-        })
+      const response = await assistantService.chat({
+        message: messageText,
+        language: language,
+        conversation_id: 'active-session-wc-2026'
       });
 
       const assistantMsg: Message = {
@@ -89,7 +72,6 @@ export default function ChatWidget() {
       if (audioGuideActive && !response.flagged) {
         speakText(response.reply);
       }
-
     } catch (err: any) {
       setMessages(prev => [...prev, {
         role: 'assistant',
@@ -110,7 +92,6 @@ export default function ChatWidget() {
       height: '600px',
       background: 'rgba(15, 23, 42, 0.85)'
     }}>
-      
       {/* Header */}
       <div style={{
         display: 'flex',
@@ -126,7 +107,6 @@ export default function ChatWidget() {
           </p>
         </div>
         
-        {/* Language selector */}
         <div>
           <label htmlFor="language-select" className="sr-only">Select Help Language</label>
           <select
@@ -154,190 +134,35 @@ export default function ChatWidget() {
         flexDirection: 'column',
         gap: '14px'
       }}>
-        {messages.map((m, idx) => {
-          const isUser = m.role === 'user';
-          return (
-            <div key={idx} style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: isUser ? 'flex-end' : 'flex-start',
-              maxWidth: '85%',
-              alignSelf: isUser ? 'flex-end' : 'flex-start'
-            }}>
-              
-              {/* Message content box */}
-              <div style={{
-                background: isUser ? 'var(--color-secondary)' : 'var(--bg-secondary)',
-                color: isUser ? '#ffffff' : 'var(--text-primary)',
-                padding: '12px 16px',
-                borderRadius: '12px',
-                borderTopRightRadius: isUser ? '2px' : '12px',
-                borderTopLeftRadius: isUser ? '12px' : '2px',
-                fontSize: '0.95rem',
-                border: isUser ? 'none' : '1px solid var(--border-glass)',
-                position: 'relative'
-              }}>
-                {m.content}
-                
-                {/* Visual Tool Calls Log inside bubble */}
-                {!isUser && m.tool_calls && m.tool_calls.length > 0 && (
-                  <div style={{
-                    background: 'rgba(16, 185, 129, 0.1)',
-                    border: '1px solid rgba(16, 185, 129, 0.25)',
-                    borderRadius: '6px',
-                    padding: '8px 12px',
-                    marginTop: '8px',
-                    fontSize: '0.78rem',
-                    fontFamily: 'monospace',
-                    color: '#34d399',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '4px'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}>
-                      <Wrench size={12} />
-                      <span>Operations Tool Executed:</span>
-                    </div>
-                    {m.tool_calls.map((t, tIdx) => (
-                      <div key={tIdx} style={{ paddingLeft: '8px', borderLeft: '1px solid rgba(52, 211, 153, 0.3)' }}>
-                        <strong>{t.function_name}</strong>({JSON.stringify(t.arguments)})
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {/* Speech read button for AI answers */}
-                {!isUser && m.confidence !== undefined && (
-                  <button
-                    onClick={() => speakText(m.content)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--text-muted)',
-                      cursor: 'pointer',
-                      position: 'absolute',
-                      right: '6px',
-                      bottom: '-22px'
-                    }}
-                    title="Speak answer"
-                    aria-label="Speak text aloud"
-                  >
-                    <Volume2 size={12} />
-                  </button>
-                )}
-              </div>
-
-              {/* Anomaly / Injection Check Warning */}
-              {m.flagged && (
-                <div style={{
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid var(--color-danger)',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  marginTop: '8px',
-                  fontSize: '0.8rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  color: 'var(--color-danger)'
-                }}>
-                  <AlertTriangle size={14} />
-                  <span>Security Block: {m.flag_reason}</span>
-                </div>
-              )}
-
-              {/* Intent Classifier & Confidence scores display */}
-              {!isUser && (m.confidence !== undefined || m.intent) && (
-                <div style={{
-                  fontSize: '0.75rem',
-                  color: 'var(--text-muted)',
-                  marginTop: '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  paddingLeft: '4px'
-                }}>
-                  {m.confidence !== undefined && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-                      <ShieldCheck size={12} color={m.confidence > 0.8 ? 'var(--color-primary)' : 'var(--color-accent)'} />
-                      <span>Confidence: {Math.round(m.confidence * 100)}%</span>
-                    </div>
-                  )}
-                  {m.intent && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-                      <Cpu size={12} color="var(--color-secondary)" />
-                      <span>Intent: {m.intent.toUpperCase()}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Suggested actions inside chat bubbles */}
-              {!isUser && m.suggested_actions && m.suggested_actions.length > 0 && (
-                <div style={{
-                  display: 'flex',
-                  gap: '8px',
-                  flexWrap: 'wrap',
-                  marginTop: '10px'
-                }}>
-                  {m.suggested_actions.map((act, aIdx) => (
-                    <button
-                      key={aIdx}
-                      className="btn btn-secondary"
-                      style={{
-                        padding: '6px 12px',
-                        fontSize: '0.8rem',
-                        borderRadius: '20px'
-                      }}
-                      onClick={() => handleSend(act)}
-                    >
-                      {act}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-            </div>
-          );
-        })}
-        {loading && (
-          <div style={{ alignSelf: 'flex-start', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-            AI is analyzing input...
-          </div>
-        )}
+        {messages.map((m, idx) => (
+          <MessageItem key={idx} message={m} speakText={speakText} handleSend={handleSend} />
+        ))}
         <div ref={scrollRef} />
       </div>
 
-      {/* Input control form */}
-      <form onSubmit={e => {
-        e.preventDefault();
-        handleSend(input);
-      }} style={{
-        display: 'flex',
-        gap: '10px',
+      {/* Input Tray */}
+      <div style={{
         paddingTop: '14px',
         borderTop: '1px solid var(--border-glass)'
       }}>
-        <input
-          type="text"
-          className="form-input"
-          placeholder="Ask something (e.g. 'Where is Gate D?', 'Evacuation steps')..."
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          aria-label="User assistant chat input"
-          disabled={loading}
-        />
-        <button
-          type="submit"
-          className="btn btn-primary"
-          style={{ padding: '0 20px' }}
-          disabled={loading}
-          aria-label="Send Message"
-        >
-          <Send size={16} />
-        </button>
-      </form>
-      
+        <form onSubmit={(e) => { e.preventDefault(); handleSend(input); }} style={{
+          display: 'flex',
+          gap: '8px'
+        }}>
+          <input
+            type="text"
+            className="form-input"
+            placeholder="Ask something (e.g. 'Where is Gate D?', 'Evacuation steps')..."
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            disabled={loading}
+            aria-label="Assistant question input query"
+          />
+          <button type="submit" className="btn btn-primary" style={{ padding: '12px' }} disabled={loading} aria-label="Send message query">
+            <Send size={16} />
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,11 @@
+{
+  "name": "stadium-os-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "npm --prefix frontend test"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

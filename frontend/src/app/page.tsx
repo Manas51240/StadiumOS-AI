@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/core/context/AuthContext';
 import Link from 'next/link';
 import { ShieldCheck, Compass, MessageSquare, Users, AlertTriangle } from 'lucide-react';
+import AuthForm from '../features/auth/components/AuthForm';
 
 export default function Home() {
   const { user, login, signup, loading } = useAuth();
@@ -22,20 +23,24 @@ export default function Home() {
     setErrorMsg('');
     setSuccessMsg('');
 
-    if (isLogin) {
-      const success = await login(email, password);
-      if (!success) {
-        setErrorMsg('Invalid email or password. Hint: You must sign up an account first!');
-      }
-    } else {
-      const success = await signup(email, password, fullName, role);
-      if (success) {
-        setSuccessMsg('Account registered successfully! You can now log in.');
-        setIsLogin(true);
-        setPassword('');
+    try {
+      if (isLogin) {
+        const success = await login(email, password);
+        if (!success) {
+          setErrorMsg('Invalid email or password. Hint: You must sign up an account first!');
+        }
       } else {
-        setErrorMsg('Failed to register account. Check if email is already in use.');
+        const success = await signup(email, password, fullName, role);
+        if (success) {
+          setSuccessMsg('Account registered successfully! You can now log in.');
+          setIsLogin(true);
+          setPassword('');
+        } else {
+          setErrorMsg('Failed to register account. Check if email is already in use.');
+        }
       }
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Operation failed');
     }
   };
 
@@ -127,116 +132,23 @@ export default function Home() {
     );
   }
 
-  // Authentication Panel (Signup / Login toggle)
   return (
-    <div className="container animated-fade" style={{ display: 'flex', justifyContent: 'center', marginTop: '40px' }}>
-      <div className="glass-panel" style={{ width: '100%', maxWidth: '480px' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>
-          {isLogin ? 'Login to StadiumOS AI' : 'Create StadiumOS Account'}
-        </h2>
-
-        {errorMsg && (
-          <div style={{
-            background: 'rgba(239, 68, 68, 0.15)',
-            border: '1px solid var(--color-danger)',
-            padding: '10px',
-            borderRadius: '6px',
-            marginBottom: '16px',
-            fontSize: '0.85rem',
-            color: 'var(--color-danger)'
-          }}>
-            {errorMsg}
-          </div>
-        )}
-
-        {successMsg && (
-          <div style={{
-            background: 'rgba(16, 185, 129, 0.15)',
-            border: '1px solid var(--color-primary)',
-            padding: '10px',
-            borderRadius: '6px',
-            marginBottom: '16px',
-            fontSize: '0.85rem',
-            color: 'var(--color-primary)'
-          }}>
-            {successMsg}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          {!isLogin && (
-            <>
-              <div className="form-group">
-                <label className="form-label" htmlFor="register-fullname">Full Name</label>
-                <input
-                  id="register-fullname"
-                  type="text"
-                  className="form-input"
-                  value={fullName}
-                  onChange={e => setFullName(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" htmlFor="register-role">Security Role Override</label>
-                <select
-                  id="register-role"
-                  className="form-input"
-                  value={role}
-                  onChange={e => setRole(e.target.value as any)}
-                >
-                  <option value="spectator">Spectator (Standard Fan)</option>
-                  <option value="volunteer">Volunteer (Staff / Logistics)</option>
-                  <option value="security">Security Patrol (Emergency Dispatcher)</option>
-                  <option value="organizer">Organizer (Command Center Admin)</option>
-                </select>
-              </div>
-            </>
-          )}
-
-          <div className="form-group">
-            <label className="form-label" htmlFor="auth-email">Email Address</label>
-            <input
-              id="auth-email"
-              type="email"
-              className="form-input"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label" htmlFor="auth-password">Password</label>
-            <input
-              id="auth-password"
-              type="password"
-              className="form-input"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '10px' }}>
-            {isLogin ? 'Sign In' : 'Register Account'}
-          </button>
-        </form>
-
-        <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.85rem' }}>
-          <button
-            onClick={() => {
-              setIsLogin(!isLogin);
-              setErrorMsg('');
-              setSuccessMsg('');
-            }}
-            style={{ background: 'none', border: 'none', color: 'var(--color-secondary)', cursor: 'pointer', textDecoration: 'underline' }}
-          >
-            {isLogin ? "Don't have an account? Sign Up" : 'Already have an account? Log In'}
-          </button>
-        </div>
-      </div>
-    </div>
+    <AuthForm
+      isLogin={isLogin}
+      setIsLogin={setIsLogin}
+      email={email}
+      setEmail={setEmail}
+      password={password}
+      setPassword={setPassword}
+      fullName={fullName}
+      setFullName={setFullName}
+      role={role}
+      setRole={setRole}
+      errorMsg={errorMsg}
+      setErrorMsg={setErrorMsg}
+      successMsg={successMsg}
+      setSuccessMsg={setSuccessMsg}
+      handleSubmit={handleSubmit}
+    />
   );
 }

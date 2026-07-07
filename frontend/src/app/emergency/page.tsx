@@ -1,14 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../core/context/AuthContext';
-import { useAccessibility } from '../../core/context/AccessibilityContext';
+import { useAuth } from '@/core/context/AuthContext';
+import { useAccessibility } from '@/core/context/AccessibilityContext';
 import { useRouter } from 'next/navigation';
-import { useEmergencyIncidents } from '../../core/hooks/useEmergency';
-import { IncidentDTO } from '../../core/types';
-import { ShieldAlert, Radio, CheckCircle, Clock } from 'lucide-react';
+import { useEmergencyIncidents } from '@/core/hooks/useEmergency';
+import { IncidentDTO } from '@/core/types';
+import { ShieldAlert } from 'lucide-react';
+import IncidentForm from '../../features/emergency/components/IncidentForm';
+import IncidentLogsTable from '../../features/emergency/components/IncidentLogsTable';
 
-export default function EmergencyHub() {
+export default function EmergencyCenter() {
   const { user, loading } = useAuth();
   const { announce } = useAccessibility();
   const router = useRouter();
@@ -20,10 +22,11 @@ export default function EmergencyHub() {
 
   // Form States
   const [category, setCategory] = useState('medical');
-  const [severity, setSeverity] = useState('medium');
+  const [severity, setSeverity] = useState('low');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [selectedIncidentId, setSelectedIncidentId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -33,10 +36,8 @@ export default function EmergencyHub() {
 
   const loadIncidents = async () => {
     try {
-      if (user?.role !== 'spectator') {
-        const data = await getIncidents();
-        setIncidents(data);
-      }
+      const data = await getIncidents();
+      setIncidents(data);
     } catch (err: any) {
       setErrorMsg(`Failed to query incident logs: ${err.message}`);
     }
@@ -61,14 +62,10 @@ export default function EmergencyHub() {
         location,
         description
       });
-      
       setSuccessMsg('Incident reported! Dispatcher guidelines compiled by AI.');
       announce(`Incident logged: ${category} at ${location}`);
-      
-      // Reset form
       setLocation('');
       setDescription('');
-      
       loadIncidents();
     } catch (err: any) {
       setErrorMsg(`Failed to log incident: ${err.message}`);
@@ -96,7 +93,6 @@ export default function EmergencyHub() {
           <div className="skeleton" style={{ width: '320px', height: '36px', marginBottom: '8px' }} />
           <div className="skeleton" style={{ width: '480px', height: '18px' }} />
         </div>
-
         <div className="two-col-layout">
           <div className="glass-panel" style={{ height: '250px' }}>
             <div className="skeleton" style={{ width: '50%', height: '22px', marginBottom: '16px' }} />
@@ -112,8 +108,6 @@ export default function EmergencyHub() {
 
   return (
     <div className="container animated-fade">
-      
-      {/* Header */}
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-danger)' }}>
           <ShieldAlert size={26} />
@@ -137,169 +131,28 @@ export default function EmergencyHub() {
       )}
 
       <div className="two-col-layout">
-        
-        {/* Incident Report Form */}
-        <div className="glass-panel" style={{ height: 'fit-content' }}>
-          <form onSubmit={handleReport}>
-            <h2 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>Report Incident</h2>
-
-            <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div>
-                <label className="form-label" htmlFor="incident-category">Category</label>
-                <select
-                  id="incident-category"
-                  className="form-input"
-                  value={category}
-                  onChange={e => setCategory(e.target.value)}
-                >
-                  <option value="medical">Medical Alert</option>
-                  <option value="security">Security Issue</option>
-                  <option value="facilities">Facilities Hazard</option>
-                  <option value="fire">Fire Threat</option>
-                  <option value="other">Other Hazard</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="form-label" htmlFor="incident-severity">Severity Rating</label>
-                <select
-                  id="incident-severity"
-                  className="form-input"
-                  value={severity}
-                  onChange={e => setSeverity(e.target.value)}
-                >
-                  <option value="low">Low (Minor Issue)</option>
-                  <option value="medium">Medium (Requires Steward)</option>
-                  <option value="high">High (Priority Response)</option>
-                  <option value="critical">Critical (Evacuation Threat)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="incident-location">Stadium Coordinate Location</label>
-              <input
-                id="incident-location"
-                type="text"
-                className="form-input"
-                placeholder="e.g. Sector West, Row 10, Seat 4"
-                value={location}
-                onChange={e => setLocation(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="incident-desc">Incident Description Details</label>
-              <textarea
-                id="incident-desc"
-                className="form-input"
-                rows={3}
-                placeholder="Describe: collapsed fan, smoke visibility, blocked accessibility paths..."
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                required
-                style={{ resize: 'vertical', minHeight: '80px' }}
-              />
-            </div>
-
-            <button type="submit" className="btn btn-danger" style={{ width: '100%' }} disabled={submitting}>
-              {submitting ? 'Registering Dispatch Report...' : 'Transmit Emergency Dispatch'}
-            </button>
-          </form>
-        </div>
-
-        {/* Dispatch Logs (Visible to Staff only) */}
-        <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <h2 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Radio size={18} color="var(--color-primary)" />
-            Active Emergency Logs
-          </h2>
-
-          {!showLogs ? (
-            <div style={{ textAlign: 'center', padding: '30px 20px', color: 'var(--text-muted)' }}>
-              <p>Security logging console restricted to Operations Staff and First Responders.</p>
-            </div>
-          ) : incidents.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', textAlign: 'center', padding: '30px 0' }}>
-              All clear. No unresolved emergencies logged in MetLife Stadium.
-            </p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '500px', overflowY: 'auto' }}>
-              {incidents.map(inc => {
-                let severityClass = 'badge-info';
-                if (inc.severity === 'critical') severityClass = 'badge-danger';
-                else if (inc.severity === 'high') severityClass = 'badge-warning';
-
-                return (
-                  <div key={inc.id} style={{
-                    background: 'rgba(15, 23, 42, 0.3)',
-                    border: `1px solid ${inc.status === 'resolved' ? 'var(--border-glass)' : 'rgba(239, 68, 68, 0.3)'}`,
-                    borderLeft: `4px solid ${inc.status === 'resolved' ? 'var(--color-primary)' : 'var(--color-danger)'}`,
-                    padding: '16px',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span className={`badge ${severityClass}`}>
-                        {inc.category} - {inc.severity}
-                      </span>
-
-                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        {inc.status === 'resolved' ? (
-                          <>
-                            <CheckCircle size={12} color="var(--color-primary)" />
-                            Resolved
-                          </>
-                        ) : (
-                          <>
-                            <Clock size={12} color="var(--color-danger)" />
-                            Active
-                          </>
-                        )}
-                      </span>
-                    </div>
-
-                    <p style={{ fontSize: '0.9rem', margin: 0, color: 'var(--text-primary)' }}>{inc.description}</p>
-                    
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                      Coordinate Location: <strong>{inc.location}</strong>
-                    </div>
-
-                    {inc.response_instructions && (
-                      <div style={{
-                        background: 'rgba(10, 20, 35, 0.6)',
-                        padding: '10px 12px',
-                        borderRadius: '6px',
-                        fontSize: '0.85rem',
-                        borderLeft: '3px solid var(--color-secondary)',
-                        color: 'var(--text-secondary)'
-                      }}>
-                        <strong>AI Dispatcher Guidance:</strong> {inc.response_instructions}
-                      </div>
-                    )}
-
-                    {/* Resolve action */}
-                    {inc.status !== 'resolved' && (user.role === 'organizer' || user.role === 'security') && (
-                      <button
-                        className="btn btn-secondary"
-                        style={{ padding: '4px 10px', fontSize: '0.75rem', alignSelf: 'flex-end', marginTop: '4px' }}
-                        onClick={() => handleResolve(inc.id)}
-                      >
-                        Mark Resolved
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
+        <IncidentForm
+          category={category}
+          setCategory={setCategory}
+          severity={severity}
+          setSeverity={setSeverity}
+          location={location}
+          setLocation={setLocation}
+          description={description}
+          setDescription={setDescription}
+          submitting={submitting}
+          handleReport={handleReport}
+        />
+        {showLogs && (
+          <IncidentLogsTable
+            incidents={incidents}
+            userRole={user.role}
+            handleResolve={handleResolve}
+            selectedIncidentId={selectedIncidentId}
+            setSelectedIncidentId={setSelectedIncidentId}
+          />
+        )}
       </div>
-
     </div>
   );
 }
