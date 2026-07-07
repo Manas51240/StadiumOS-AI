@@ -46,7 +46,6 @@ async def lifespan(app: FastAPI):
 
     # Seed default user if not exists
     from app.core.security import get_password_hash
-    from app.features.auth.data.models import User
     from app.core.database import SessionLocal
     from sqlalchemy import select
 
