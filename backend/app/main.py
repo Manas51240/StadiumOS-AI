@@ -43,7 +43,30 @@ async def lifespan(app: FastAPI):
     logger.info("Initializing Clean Architecture database tables...")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    logger.info("Database initialized successfully.")
+
+    # Seed default user if not exists
+    from app.core.security import get_password_hash
+    from app.features.auth.data.models import User
+    from app.core.database import SessionLocal
+    from sqlalchemy import select
+
+    async with SessionLocal() as session:
+        stmt = select(User).where(User.email == "organizer@fifa.com")
+        result = await session.execute(stmt)
+        user = result.scalar_one_or_none()
+        if not user:
+            logger.info("Seeding default user: organizer@fifa.com")
+            db_user = User(
+                email="organizer@fifa.com",
+                hashed_password=get_password_hash("strongpassword123"),
+                full_name="FIFA World Cup Organizer",
+                role="organizer",
+                is_active=True,
+            )
+            session.add(db_user)
+            await session.commit()
+
+    logger.info("Database initialized and seeded successfully.")
     yield
     logger.info("Shutting down resources...")
 
