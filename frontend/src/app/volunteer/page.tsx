@@ -92,11 +92,6 @@ export default function VolunteerHub() {
           <div className="skeleton" style={{ width: '280px', height: '36px', marginBottom: '8px' }} />
           <div className="skeleton" style={{ width: '420px', height: '18px' }} />
         </div>
-        <div className="two-col-layout">
-          <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div className="skeleton" style={{ width: '40%', height: '22px', marginBottom: '10px' }} />
-          </div>
-        </div>
       </div>
     );
   }
@@ -115,17 +110,8 @@ export default function VolunteerHub() {
         </p>
       </div>
 
-      {errorMsg && (
-        <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid var(--color-danger)', padding: '12px', borderRadius: '6px', marginBottom: '16px', color: 'var(--color-danger)', fontSize: '0.9rem' }}>
-          {errorMsg}
-        </div>
-      )}
-
-      {successMsg && (
-        <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid var(--color-primary)', padding: '12px', borderRadius: '6px', marginBottom: '16px', color: 'var(--color-primary)', fontSize: '0.9rem' }}>
-          {successMsg}
-        </div>
-      )}
+      {errorMsg && <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid var(--color-danger)', padding: '12px', borderRadius: '6px', marginBottom: '16px', color: 'var(--color-danger)', fontSize: '0.9rem' }}>{errorMsg}</div>}
+      {successMsg && <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid var(--color-primary)', padding: '12px', borderRadius: '6px', marginBottom: '16px', color: 'var(--color-primary)', fontSize: '0.9rem' }}>{successMsg}</div>}
 
       <div className="two-col-layout">
         <TasksGrid tasks={tasks} userId={user.id} handleUpdateStatus={handleUpdateStatus} />

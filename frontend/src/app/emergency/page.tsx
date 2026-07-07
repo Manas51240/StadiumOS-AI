@@ -93,13 +93,6 @@ export default function EmergencyCenter() {
           <div className="skeleton" style={{ width: '320px', height: '36px', marginBottom: '8px' }} />
           <div className="skeleton" style={{ width: '480px', height: '18px' }} />
         </div>
-        <div className="two-col-layout">
-          <div className="glass-panel" style={{ height: '250px' }}>
-            <div className="skeleton" style={{ width: '50%', height: '22px', marginBottom: '16px' }} />
-            <div className="skeleton" style={{ width: '90%', height: '40px', marginBottom: '16px' }} />
-            <div className="skeleton" style={{ width: '100%', height: '40px' }} />
-          </div>
-        </div>
       </div>
     );
   }
@@ -118,17 +111,8 @@ export default function EmergencyCenter() {
         </p>
       </div>
 
-      {errorMsg && (
-        <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid var(--color-danger)', padding: '12px', borderRadius: '6px', marginBottom: '16px', color: 'var(--color-danger)', fontSize: '0.9rem' }}>
-          {errorMsg}
-        </div>
-      )}
-
-      {successMsg && (
-        <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid var(--color-primary)', padding: '12px', borderRadius: '6px', marginBottom: '16px', color: 'var(--color-primary)', fontSize: '0.9rem' }}>
-          {successMsg}
-        </div>
-      )}
+      {errorMsg && <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid var(--color-danger)', padding: '12px', borderRadius: '6px', marginBottom: '16px', color: 'var(--color-danger)', fontSize: '0.9rem' }}>{errorMsg}</div>}
+      {successMsg && <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid var(--color-primary)', padding: '12px', borderRadius: '6px', marginBottom: '16px', color: 'var(--color-primary)', fontSize: '0.9rem' }}>{successMsg}</div>}
 
       <div className="two-col-layout">
         <IncidentForm

@@ -1,17 +1,18 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/core/context/AuthContext';
 import { useAccessibility } from '@/core/context/AccessibilityContext';
 import { useRouter } from 'next/navigation';
 import { useNavigationPlanner } from '../../core/hooks/useNavigation';
 import { NavigationNodeDTO, RouteDTO } from '../../core/types';
 import dynamic from 'next/dynamic';
+import NavigationHeader from '../../features/navigation/components/NavigationHeader';
+
 const InteractiveMap = dynamic(() => import('../../features/navigation/components/InteractiveMap'), {
   ssr: false,
   loading: () => <div className="skeleton" style={{ width: '100%', height: '400px' }} />
 });
-import { Compass, Accessibility, AlertTriangle } from 'lucide-react';
 
 export default function NavigationPage() {
   const { user, loading } = useAuth();
@@ -28,12 +29,9 @@ export default function NavigationPage() {
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/');
-    }
+    if (!loading && !user) router.push('/');
   }, [user, loading, router]);
 
-  // Load Map Nodes
   useEffect(() => {
     if (user) {
       getNodes()
@@ -42,7 +40,6 @@ export default function NavigationPage() {
     }
   }, [user, getNodes]);
 
-  // Calculate route when start/end/modes change
   useEffect(() => {
     if (selectedStart && selectedEnd) {
       if (selectedStart === selectedEnd) {
@@ -51,7 +48,6 @@ export default function NavigationPage() {
         return;
       }
       setErrorMsg('');
-      
       getRoute(selectedStart, selectedEnd, accessibilityRequired, avoidCongested)
         .then(data => {
           setRoute(data);
@@ -76,70 +72,16 @@ export default function NavigationPage() {
 
   return (
     <div className="container animated-fade">
-      
-      {/* Page Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
-        <div>
-          <h1 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Compass size={28} color="var(--color-primary)" />
-            Stadium OS Navigation
-          </h1>
-          <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-            Dynamic pathfinding across MetLife stadium gates, seats, exits, concessions, and medical stations.
-          </p>
-        </div>
+      <NavigationHeader
+        accessibilityRequired={accessibilityRequired}
+        setAccessibilityRequired={setAccessibilityRequired}
+        avoidCongested={avoidCongested}
+        setAvoidCongested={setAvoidCongested}
+        announce={announce}
+      />
 
-        {/* Accessibility & Congestion Toggles */}
-        <div className="glass-panel" style={{ display: 'flex', gap: '20px', padding: '12px 20px', alignItems: 'center' }}>
-          
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}>
-            <input
-              type="checkbox"
-              style={{ width: '16px', height: '16px', accentColor: 'var(--color-primary)' }}
-              checked={accessibilityRequired}
-              onChange={e => {
-                setAccessibilityRequired(e.target.checked);
-                announce(`Accessibility step-free routing ${e.target.checked ? "activated" : "deactivated"}`);
-              }}
-              aria-label="Toggle Accessibility Routing"
-            />
-            <Accessibility size={16} />
-            Step-free Paths
-          </label>
+      {errorMsg && <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid var(--color-danger)', padding: '10px', borderRadius: '6px', marginBottom: '20px', color: 'var(--color-danger)', fontSize: '0.85rem' }}>{errorMsg}</div>}
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}>
-            <input
-              type="checkbox"
-              style={{ width: '16px', height: '16px', accentColor: 'var(--color-primary)' }}
-              checked={avoidCongested}
-              onChange={e => {
-                setAvoidCongested(e.target.checked);
-                announce(`Bypass congested areas ${e.target.checked ? "activated" : "deactivated"}`);
-              }}
-              aria-label="Toggle Congested Area Bypass"
-            />
-            <AlertTriangle size={16} />
-            Bypass Congestion
-          </label>
-          
-        </div>
-      </div>
-
-      {errorMsg && (
-        <div style={{
-          background: 'rgba(239, 68, 68, 0.15)',
-          border: '1px solid var(--color-danger)',
-          padding: '10px',
-          borderRadius: '6px',
-          marginBottom: '20px',
-          color: 'var(--color-danger)',
-          fontSize: '0.85rem'
-        }}>
-          {errorMsg}
-        </div>
-      )}
-
-      {/* Main Map Viewer */}
       <InteractiveMap
         nodes={nodes}
         route={route}
@@ -149,7 +91,6 @@ export default function NavigationPage() {
         onSelectEnd={setSelectedEnd}
       />
 
-      {/* Quick Action Reset */}
       {(selectedStart || selectedEnd) && (
         <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
           <button
@@ -165,7 +106,6 @@ export default function NavigationPage() {
           </button>
         </div>
       )}
-
     </div>
   );
 }

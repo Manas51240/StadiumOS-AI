@@ -60,22 +60,12 @@ export default function CommandCenter() {
 
   const handleBroadcastAlert = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg('');
-    setSuccessMsg('');
-    setAlertSubmitting(true);
-
+    setErrorMsg(''); setSuccessMsg(''); setAlertSubmitting(true);
     try {
-      await createCrowdAlert({
-        sector,
-        congestion_level: congestionLevel,
-        spectator_count: Number(spectatorCount),
-        capacity: Number(capacity),
-        message
-      });
+      await createCrowdAlert({ sector, congestion_level: congestionLevel, spectator_count: Number(spectatorCount), capacity: Number(capacity), message });
       setSuccessMsg('Congestion warning broadcasted to operations personnel.');
       announce(`Broadcasted alert: ${congestionLevel} congestion in ${sector}`);
-      setMessage('');
-      loadDashboard();
+      setMessage(''); loadDashboard();
     } catch (err: any) {
       setErrorMsg(`Failed to broadcast alert: ${err.message}`);
     } finally {
@@ -84,11 +74,8 @@ export default function CommandCenter() {
   };
 
   const handleGenerateReport = async () => {
-    setErrorMsg('');
-    setSuccessMsg('');
-    setGeneratingReport(true);
+    setErrorMsg(''); setSuccessMsg(''); setGeneratingReport(true);
     announce("Initiating AI report compilation...");
-
     try {
       const rep = await generateReport(reportType);
       setSuccessMsg(`AI Report '${rep.title}' compiled and archived!`);
@@ -104,19 +91,7 @@ export default function CommandCenter() {
   if (loading || !user || !stats) {
     return (
       <div className="container animated-fade" style={{ marginTop: '24px' }}>
-        <div style={{ marginBottom: '24px' }}>
-          <div className="skeleton" style={{ width: '320px', height: '36px', marginBottom: '8px' }} />
-          <div className="skeleton" style={{ width: '480px', height: '18px' }} />
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '30px' }}>
-          {[1, 2, 3, 4].map(idx => (
-            <div key={idx} className="glass-panel" style={{ height: '120px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div className="skeleton" style={{ width: '50%', height: '14px' }} />
-              <div className="skeleton" style={{ width: '35%', height: '26px' }} />
-              <div className="skeleton" style={{ width: '70%', height: '12px' }} />
-            </div>
-          ))}
-        </div>
+        <h2>Loading Command Center...</h2>
       </div>
     );
   }
@@ -133,17 +108,8 @@ export default function CommandCenter() {
         </p>
       </div>
 
-      {errorMsg && (
-        <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid var(--color-danger)', padding: '12px', borderRadius: '6px', marginBottom: '16px', color: 'var(--color-danger)', fontSize: '0.9rem' }}>
-          {errorMsg}
-        </div>
-      )}
-
-      {successMsg && (
-        <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid var(--color-primary)', padding: '12px', borderRadius: '6px', marginBottom: '16px', color: 'var(--color-primary)', fontSize: '0.9rem' }}>
-          {successMsg}
-        </div>
-      )}
+      {errorMsg && <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid var(--color-danger)', padding: '12px', borderRadius: '6px', marginBottom: '16px', color: 'var(--color-danger)', fontSize: '0.9rem' }}>{errorMsg}</div>}
+      {successMsg && <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid var(--color-primary)', padding: '12px', borderRadius: '6px', marginBottom: '16px', color: 'var(--color-primary)', fontSize: '0.9rem' }}>{successMsg}</div>}
 
       <StatsCards stats={stats} />
 
