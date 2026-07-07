@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/core/context/AuthContext';
 import { useAccessibility } from '@/core/context/AccessibilityContext';
-import { Compass, ShieldAlert, Users, LogOut, Volume2, ChevronRight } from 'lucide-react';
+import { LogOut, ChevronRight } from 'lucide-react';
 import A11yControls from './A11yControls';
+import NavLinks from './NavLinks';
 
 export default function Header() {
   const { user, logout } = useAuth();
@@ -80,102 +81,7 @@ export default function Header() {
         </div>
 
         {/* Navigation Links */}
-        {user && (
-          <nav aria-label="Main Navigation" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            {(user.role === 'organizer' || user.role === 'security') && (
-              <Link
-                href="/dashboard"
-                style={{
-                  color: pathname === '/dashboard' ? 'var(--text-primary)' : 'var(--text-secondary)',
-                  background: pathname === '/dashboard' ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
-                  padding: '8px 12px',
-                  borderRadius: '4px',
-                  textDecoration: 'none',
-                  fontSize: '0.85rem',
-                  fontWeight: 600
-                }}
-              >
-                Dashboard
-              </Link>
-            )}
-
-            <Link
-              href="/navigation"
-              style={{
-                color: pathname === '/navigation' ? 'var(--text-primary)' : 'var(--text-secondary)',
-                background: pathname === '/navigation' ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
-                padding: '8px 12px',
-                borderRadius: '4px',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                fontSize: '0.85rem',
-                fontWeight: 600
-              }}
-            >
-              <Compass size={14} />
-              Navigation
-            </Link>
-
-            <Link
-              href="/assistant"
-              style={{
-                color: pathname === '/assistant' ? 'var(--text-primary)' : 'var(--text-secondary)',
-                background: pathname === '/assistant' ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
-                padding: '8px 12px',
-                borderRadius: '4px',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                fontSize: '0.85rem',
-                fontWeight: 600
-              }}
-            >
-              <Volume2 size={14} />
-              AI Support
-            </Link>
-
-            <Link
-              href="/volunteer"
-              style={{
-                color: pathname === '/volunteer' ? 'var(--text-primary)' : 'var(--text-secondary)',
-                background: pathname === '/volunteer' ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
-                padding: '8px 12px',
-                borderRadius: '4px',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                fontSize: '0.85rem',
-                fontWeight: 600
-              }}
-            >
-              <Users size={14} />
-              Volunteers
-            </Link>
-
-            <Link
-              href="/emergency"
-              style={{
-                color: pathname === '/emergency' ? 'var(--text-primary)' : 'var(--text-secondary)',
-                background: pathname === '/emergency' ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
-                padding: '8px 12px',
-                borderRadius: '4px',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                fontSize: '0.85rem',
-                fontWeight: 600
-              }}
-            >
-              <ShieldAlert size={14} />
-              Emergency
-            </Link>
-          </nav>
-        )}
+        {user && <NavLinks user={user} pathname={pathname} />}
 
         {/* Quick actions controls */}
         <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>

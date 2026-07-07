@@ -38,9 +38,9 @@ export default function AuthForm({
   return (
     <div className="container animated-fade" style={{ display: 'flex', justifyContent: 'center', marginTop: '40px' }}>
       <div className="glass-panel" style={{ width: '100%', maxWidth: '480px' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <h1 style={{ textAlign: 'center', marginBottom: '20px', fontSize: '1.5rem', fontWeight: 'bold' }}>
           {isLogin ? 'Login to StadiumOS AI' : 'Create StadiumOS Account'}
-        </h2>
+        </h1>
 
         {errorMsg && (
           <div style={{

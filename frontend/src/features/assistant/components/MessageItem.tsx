@@ -1,6 +1,8 @@
 import React from 'react';
-import { Volume2, AlertTriangle, Wrench, ShieldCheck, Cpu } from 'lucide-react';
+import { AlertTriangle, Wrench } from 'lucide-react';
 import DOMPurify from 'dompurify';
+import SuggestedActions from './SuggestedActions';
+import MessageMeta from './MessageMeta';
 
 export interface ToolCall {
   function_name: string;
@@ -27,7 +29,6 @@ interface MessageItemProps {
 export default function MessageItem({ message, speakText, handleSend }: MessageItemProps) {
   const isUser = message.role === 'user';
   
-  // Sanitize the HTML content of the message to protect against XSS
   const sanitizedContent = typeof window !== 'undefined'
     ? DOMPurify.sanitize(message.content)
     : message.content;
@@ -53,10 +54,8 @@ export default function MessageItem({ message, speakText, handleSend }: MessageI
         border: isUser ? 'none' : '1px solid var(--border-glass)',
         position: 'relative'
       }}>
-        {/* Render sanitized HTML safely */}
         <div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
         
-        {/* Visual Tool Calls Log inside bubble */}
         {!isUser && message.tool_calls && message.tool_calls.length > 0 && (
           <div style={{
             background: 'rgba(16, 185, 129, 0.1)',
@@ -84,50 +83,15 @@ export default function MessageItem({ message, speakText, handleSend }: MessageI
         )}
       </div>
 
-      {/* Meta Indicators under bubble */}
       {!isUser && (
-        <div style={{
-          display: 'flex',
-          gap: '12px',
-          alignItems: 'center',
-          marginTop: '4px',
-          fontSize: '0.78rem',
-          color: 'var(--text-muted)',
-          paddingLeft: '4px'
-        }}>
-          {message.confidence !== undefined && (
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Cpu size={12} />
-              Confidence: {Math.round(message.confidence * 100)}%
-            </span>
-          )}
-          
-          {message.intent && (
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <ShieldCheck size={12} color="var(--color-primary)" />
-              Intent: {message.intent.toUpperCase()}
-            </span>
-          )}
-
-          <button
-            onClick={() => speakText(message.content)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              padding: 0
-            }}
-            aria-label="Speak text response"
-          >
-            <Volume2 size={12} />
-          </button>
-        </div>
+        <MessageMeta
+          confidence={message.confidence}
+          intent={message.intent}
+          content={message.content}
+          speakText={speakText}
+        />
       )}
 
-      {/* Guardrails flagging warnings */}
       {!isUser && message.flagged && (
         <div style={{
           marginTop: '6px',
@@ -146,30 +110,8 @@ export default function MessageItem({ message, speakText, handleSend }: MessageI
         </div>
       )}
 
-      {/* Suggested action tags */}
-      {!isUser && message.suggested_actions && message.suggested_actions.length > 0 && (
-        <div style={{
-          display: 'flex',
-          gap: '8px',
-          marginTop: '8px',
-          flexWrap: 'wrap'
-        }}>
-          {message.suggested_actions.map((act, actIdx) => (
-            <button
-              key={actIdx}
-              onClick={() => handleSend(act)}
-              className="btn btn-secondary"
-              style={{
-                padding: '4px 10px',
-                fontSize: '0.78rem',
-                borderRadius: '20px',
-                background: 'rgba(255, 255, 255, 0.05)'
-              }}
-            >
-              {act}
-            </button>
-          ))}
-        </div>
+      {!isUser && message.suggested_actions && (
+        <SuggestedActions actions={message.suggested_actions} handleSend={handleSend} />
       )}
     </div>
   );

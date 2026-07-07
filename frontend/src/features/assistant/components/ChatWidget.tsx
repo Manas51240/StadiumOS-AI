@@ -3,8 +3,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../../core/context/AuthContext';
 import { useAccessibility } from '../../../core/context/AccessibilityContext';
-import { Send } from 'lucide-react';
 import MessageItem, { Message } from './MessageItem';
+import ChatHeader from './ChatHeader';
+import ChatInput from './ChatInput';
 import { assistantService } from '../../../services/api';
 
 export default function ChatWidget() {
@@ -92,40 +93,8 @@ export default function ChatWidget() {
       height: '600px',
       background: 'rgba(15, 23, 42, 0.85)'
     }}>
-      {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingBottom: '14px',
-        borderBottom: '1px solid var(--border-glass)'
-      }}>
-        <div>
-          <h2 style={{ fontSize: '1.2rem', margin: 0 }}>StadiumOS AI Assistant</h2>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
-            Operational Mode: <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>{(user?.role || 'spectator').toUpperCase()}</span>
-          </p>
-        </div>
-        
-        <div>
-          <label htmlFor="language-select" className="sr-only">Select Help Language</label>
-          <select
-            id="language-select"
-            className="form-input"
-            style={{ padding: '6px 12px', fontSize: '0.85rem', width: '120px' }}
-            value={language}
-            onChange={e => setLanguage(e.target.value)}
-          >
-            <option value="en">English</option>
-            <option value="es">Español</option>
-            <option value="fr">Français</option>
-            <option value="ar">العربية</option>
-            <option value="de">Deutsch</option>
-          </select>
-        </div>
-      </div>
+      <ChatHeader userRole={user?.role || 'spectator'} language={language} setLanguage={setLanguage} />
 
-      {/* Messages Canvas */}
       <div style={{
         flex: 1,
         overflowY: 'auto',
@@ -140,29 +109,7 @@ export default function ChatWidget() {
         <div ref={scrollRef} />
       </div>
 
-      {/* Input Tray */}
-      <div style={{
-        paddingTop: '14px',
-        borderTop: '1px solid var(--border-glass)'
-      }}>
-        <form onSubmit={(e) => { e.preventDefault(); handleSend(input); }} style={{
-          display: 'flex',
-          gap: '8px'
-        }}>
-          <input
-            type="text"
-            className="form-input"
-            placeholder="Ask something (e.g. 'Where is Gate D?', 'Evacuation steps')..."
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            disabled={loading}
-            aria-label="Assistant question input query"
-          />
-          <button type="submit" className="btn btn-primary" style={{ padding: '12px' }} disabled={loading} aria-label="Send message query">
-            <Send size={16} />
-          </button>
-        </form>
-      </div>
+      <ChatInput input={input} setInput={setInput} loading={loading} handleSend={handleSend} />
     </div>
   );
 }
