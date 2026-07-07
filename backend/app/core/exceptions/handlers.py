@@ -6,10 +6,13 @@ from app.core.exceptions.exceptions import (
     ValidationError,
     UnauthorizedError,
     ForbiddenError,
-    ConflictError
+    ConflictError,
 )
 
-async def domain_exception_handler(request: Request, exc: DomainException) -> JSONResponse:
+
+async def domain_exception_handler(
+    request: Request, exc: DomainException
+) -> JSONResponse:
     status_code = 500
     if isinstance(exc, EntityNotFoundError):
         status_code = 404
@@ -21,8 +24,5 @@ async def domain_exception_handler(request: Request, exc: DomainException) -> JS
         status_code = 403
     elif isinstance(exc, ConflictError):
         status_code = 400
-        
-    return JSONResponse(
-        status_code=status_code,
-        content={"detail": exc.message}
-    )
+
+    return JSONResponse(status_code=status_code, content={"detail": exc.message})

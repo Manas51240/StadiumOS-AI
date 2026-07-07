@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 import datetime
 
+
 class CrowdAlertDTO(BaseModel):
     id: int
     sector: str
@@ -14,6 +15,7 @@ class CrowdAlertDTO(BaseModel):
     class Config:
         from_attributes = True
 
+
 class SectorPredictionDTO(BaseModel):
     sector: str
     spectator_count: int
@@ -21,6 +23,7 @@ class SectorPredictionDTO(BaseModel):
     occupancy_rate: str
     congestion_level: str
     recommendation: str
+
 
 class CrowdPredictionDTO(BaseModel):
     timestamp: datetime.datetime

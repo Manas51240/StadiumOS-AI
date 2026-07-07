@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import datetime
 from typing import Optional
 
+
 @dataclass
 class IncidentEntity:
     category: str

@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+
 class SustainabilityMetricCreateSchema(BaseModel):
     sector: str = Field(..., min_length=2)
     power_kwh: float = Field(..., ge=0.0)

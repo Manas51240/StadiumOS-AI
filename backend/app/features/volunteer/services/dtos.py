@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 import datetime
 
+
 class VolunteerTaskDTO(BaseModel):
     id: int
     title: str

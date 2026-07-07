@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 import datetime
 
+
 class IncidentDTO(BaseModel):
     id: int
     category: str

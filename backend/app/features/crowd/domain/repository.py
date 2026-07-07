@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List
 from app.features.crowd.domain.entities import CrowdAlertEntity
 
+
 class CrowdRepository(ABC):
     @abstractmethod
     async def get_all_alerts(self) -> List[CrowdAlertEntity]:

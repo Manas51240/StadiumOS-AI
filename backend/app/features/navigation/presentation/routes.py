@@ -12,24 +12,30 @@ from app.features.navigation.presentation.schemas import NavigationNodeCreateSch
 
 router = APIRouter()
 
+
 def get_navigation_service(db: AsyncSession = Depends(get_db)) -> NavigationService:
     repo = SQLNavigationRepository(db)
     return NavigationService(repo)
 
+
 admin_access = RoleChecker(allowed_roles=["organizer"])
+
 
 @router.get("/nodes", response_model=List[NavigationNodeDTO])
 async def get_nodes_route(
     service: NavigationService = Depends(get_navigation_service),
-    current_user: UserDTO = Depends(get_current_user)
+    current_user: UserDTO = Depends(get_current_user),
 ):
     return await service.list_nodes()
 
-@router.post("/nodes", response_model=NavigationNodeDTO, status_code=status.HTTP_201_CREATED)
+
+@router.post(
+    "/nodes", response_model=NavigationNodeDTO, status_code=status.HTTP_201_CREATED
+)
 async def create_node_route(
     node_in: NavigationNodeCreateSchema,
     service: NavigationService = Depends(get_navigation_service),
-    current_user: UserDTO = Depends(admin_access)
+    current_user: UserDTO = Depends(admin_access),
 ):
     return await service.add_node(
         name=node_in.name,
@@ -38,8 +44,9 @@ async def create_node_route(
         lat=node_in.lat,
         lng=node_in.lng,
         sector=node_in.sector,
-        details=node_in.details or ""
+        details=node_in.details or "",
     )
+
 
 @router.get("/route", response_model=RouteDTO)
 async def calculate_route_route(
@@ -48,11 +55,11 @@ async def calculate_route_route(
     accessibility_required: bool = False,
     avoid_congested_sectors: bool = True,
     service: NavigationService = Depends(get_navigation_service),
-    current_user: UserDTO = Depends(get_current_user)
+    current_user: UserDTO = Depends(get_current_user),
 ):
     return await service.calculate_path(
         start_id=start_id,
         end_id=end_id,
         accessibility_required=accessibility_required,
-        avoid_congested_sectors=avoid_congested_sectors
+        avoid_congested_sectors=avoid_congested_sectors,
     )

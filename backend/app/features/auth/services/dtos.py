@@ -2,6 +2,7 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 import datetime
 
+
 class UserDTO(BaseModel):
     id: int
     email: EmailStr
@@ -12,6 +13,7 @@ class UserDTO(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class TokenDTO(BaseModel):
     access_token: str

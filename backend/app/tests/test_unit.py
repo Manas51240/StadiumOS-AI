@@ -33,6 +33,7 @@ from app.features.assistant.services.ai_service import ai_service
 from app.features.auth.presentation.routes import RoleChecker
 from app.features.assistant.presentation.schemas import ChatRequest
 
+
 @pytest.mark.asyncio
 async def test_all_services_clean_architecture(db_session):
     # Setup concrete repositories
@@ -51,13 +52,17 @@ async def test_all_services_clean_architecture(db_session):
     emergency_service = EmergencyService(incident_repo)
     volunteer_service = VolunteerService(volunteer_repo)
     sustain_service = SustainabilityService(sustain_repo)
-    reports_service = ReportsService(reports_repo, incident_repo, volunteer_repo, sustain_repo)
+    reports_service = ReportsService(
+        reports_repo, incident_repo, volunteer_repo, sustain_repo
+    )
 
     # 1. Seeding default data check (sustainability & volunteer default seeds)
     seeded_metrics = await sustain_service.list_metrics()
     assert len(seeded_metrics) >= 1
-    
-    seeded_tasks = await volunteer_service.list_tasks(user_role="organizer", user_id=999)
+
+    seeded_tasks = await volunteer_service.list_tasks(
+        user_role="organizer", user_id=999
+    )
     assert len(seeded_tasks) >= 1
 
     # 2. Auth service operations
@@ -65,12 +70,14 @@ async def test_all_services_clean_architecture(db_session):
         email="new_unit@fifa.com",
         password="strongpassword",
         full_name="Match Coordinator",
-        role="organizer"
+        role="organizer",
     )
     assert user_dto.email == "new_unit@fifa.com"
 
     # login successful
-    token_dto = await auth_service.login(email="new_unit@fifa.com", password="strongpassword")
+    token_dto = await auth_service.login(
+        email="new_unit@fifa.com", password="strongpassword"
+    )
     assert token_dto.access_token is not None
 
     # login fails
@@ -87,10 +94,10 @@ async def test_all_services_clean_architecture(db_session):
         congestion_level="high",
         spectator_count=13000,
         capacity=15000,
-        message="Congested plaza"
+        message="Congested plaza",
     )
     assert alert.sector == "North Stand"
-    
+
     alerts = await crowd_service.list_alerts()
     assert len(alerts) >= 1
 
@@ -108,7 +115,7 @@ async def test_all_services_clean_architecture(db_session):
         lat=40.812,
         lng=-74.073,
         sector="North Stand",
-        details="Hotdogs"
+        details="Hotdogs",
     )
     assert new_node.name == "Concessions North"
 
@@ -121,7 +128,7 @@ async def test_all_services_clean_architecture(db_session):
         severity="high",
         description="Fainted fan",
         location="Sector East",
-        reported_by_id=user_dto.id
+        reported_by_id=user_dto.id,
     )
     assert incident.category == "medical"
     assert incident.response_instructions is not None
@@ -139,14 +146,19 @@ async def test_all_services_clean_architecture(db_session):
         priority="high",
         sector="West Stand",
         shift_start=datetime.datetime.now(datetime.timezone.utc),
-        shift_end=datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=2)
+        shift_end=datetime.datetime.now(datetime.timezone.utc)
+        + datetime.timedelta(hours=2),
     )
     assert task.title == "Escort duties"
 
-    tasks_list = await volunteer_service.list_tasks(user_role="volunteer", user_id=user_dto.id)
+    tasks_list = await volunteer_service.list_tasks(
+        user_role="volunteer", user_id=user_dto.id
+    )
     assert len(tasks_list) >= 1
 
-    updated = await volunteer_service.update_task(task.id, "organizer", user_dto.id, status="active")
+    updated = await volunteer_service.update_task(
+        task.id, "organizer", user_dto.id, status="active"
+    )
     assert updated.status == "active"
 
     # 7. Sustainability operations
@@ -155,7 +167,7 @@ async def test_all_services_clean_architecture(db_session):
         power_kwh=100.0,
         water_liters=100.0,
         waste_kg=100.0,
-        recycling_rate=0.85
+        recycling_rate=0.85,
     )
     assert metric.recycling_rate == 0.85
 
@@ -171,18 +183,21 @@ async def test_all_services_clean_architecture(db_session):
 
     # 9. Role Validation DIs unit checks
     from app.features.auth.services.dtos import UserDTO
+
     mock_user_dto = UserDTO(
         id=user_dto.id,
         email=user_dto.email,
         full_name=user_dto.full_name,
         role="spectator",
         is_active=True,
-        created_at=user_dto.created_at
+        created_at=user_dto.created_at,
     )
     checker = RoleChecker(allowed_roles=["organizer"])
     with pytest.raises(Exception):
         checker(mock_user_dto)
 
     # 10. AI Service logic unit check
-    chat_res = await ai_service.get_chat_response(ChatRequest(message="Where is elevator 3?"))
+    chat_res = await ai_service.get_chat_response(
+        ChatRequest(message="Where is elevator 3?")
+    )
     assert chat_res.flagged is False

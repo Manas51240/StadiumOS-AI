@@ -2,6 +2,7 @@ from pydantic import BaseModel
 import datetime
 from typing import List
 
+
 class SustainabilityMetricDTO(BaseModel):
     id: int
     sector: str
@@ -13,6 +14,7 @@ class SustainabilityMetricDTO(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class SustainabilitySummaryDTO(BaseModel):
     total_power_kwh: float

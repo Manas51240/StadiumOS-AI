@@ -22,7 +22,7 @@ INJECTION_PATTERNS = [
     r"ignore\s+above",
     r"developer\s+mode",
     r"override\s+role",
-    r"jailbreak"
+    r"jailbreak",
 ]
 
 SYSTEM_PROMPTS = {
@@ -43,7 +43,7 @@ SYSTEM_PROMPTS = {
     "organizer": (
         "You are the StadiumOS AI Organizer Operations Engine. Analyze high-level metrics, sustainability data, "
         "attendance figures, and reports. Provide structured summaries."
-    )
+    ),
 }
 
 KNOWLEDGE_BASE = {
@@ -51,44 +51,48 @@ KNOWLEDGE_BASE = {
         "text": "Gates open 3 hours prior to kickoff. Accessibility entrance is Gate D. Use Gate A/B/C for general admissions.",
         "intent": "navigation",
         "tool": "get_gate_info",
-        "args": {"accessibility_gate": "Gate D"}
+        "args": {"accessibility_gate": "Gate D"},
     },
     "routes": {
         "text": "Accessibility route active. Take Elevator 3 located in Sector North to access Level 2. Do not use Escalator 1.",
         "intent": "navigation",
         "tool": "get_accessibility_path",
-        "args": {"elevator": "Elevator 3", "sector": "North"}
+        "args": {"elevator": "Elevator 3", "sector": "North"},
     },
     "emergency": {
         "text": "Emergency evacuation active. Guide spectators to Exits 1-12 located on all lower concourse stand sectors.",
         "intent": "emergency",
         "tool": "trigger_evacuation_routing",
-        "args": {"exits": "Exits 1-12"}
+        "args": {"exits": "Exits 1-12"},
     },
     "sustainability": {
         "text": "Sustainability report: MetLife stadium utilizes 100% LED fixtures, zero-waste composting bins, and rainwater pitch harvesting.",
         "intent": "sustainability",
         "tool": "get_sustainability_metrics",
-        "args": {"metrics": ["LED", "composting", "rainwater"]}
+        "args": {"metrics": ["LED", "composting", "rainwater"]},
     },
     "volunteer": {
         "text": "Volunteer protocol: Briefings occur at the Volunteer Hub in Sector West Level 1. Uniform: green tournament kit.",
         "intent": "volunteer",
         "tool": "get_volunteer_briefing",
-        "args": {"location": "Sector West, Level 1"}
+        "args": {"location": "Sector West, Level 1"},
     },
     "capacity": {
         "text": "Stadium stats: MetLife capacity for FIFA 2026 is 82,500. Expected attendance load is 98% (80,850).",
         "intent": "general",
         "tool": "get_capacity_stats",
-        "args": {"capacity": 82500, "expected": 80850}
-    }
+        "args": {"capacity": 82500, "expected": 80850},
+    },
 }
+
 
 class AIService:
     def __init__(self):
         self.api_key_valid = False
-        if settings.GEMINI_API_KEY and settings.GEMINI_API_KEY != "mock-key-for-stadium-os":
+        if (
+            settings.GEMINI_API_KEY
+            and settings.GEMINI_API_KEY != "mock-key-for-stadium-os"
+        ):
             try:
                 genai.configure(api_key=settings.GEMINI_API_KEY)
                 self.api_key_valid = True
@@ -122,20 +126,42 @@ class AIService:
 
     def _classify_intent(self, message: str) -> str:
         msg_lower = message.lower()
-        if "gate" in msg_lower or "entrance" in msg_lower or "where is" in msg_lower or "elevator" in msg_lower or "waypoint" in msg_lower:
+        if (
+            "gate" in msg_lower
+            or "entrance" in msg_lower
+            or "where is" in msg_lower
+            or "elevator" in msg_lower
+            or "waypoint" in msg_lower
+        ):
             return "navigation"
-        if "emergency" in msg_lower or "evacuate" in msg_lower or "fire" in msg_lower or "hazard" in msg_lower or "danger" in msg_lower:
+        if (
+            "emergency" in msg_lower
+            or "evacuate" in msg_lower
+            or "fire" in msg_lower
+            or "hazard" in msg_lower
+            or "danger" in msg_lower
+        ):
             return "emergency"
-        if "volunteer" in msg_lower or "shift" in msg_lower or "duty" in msg_lower or "checklist" in msg_lower:
+        if (
+            "volunteer" in msg_lower
+            or "shift" in msg_lower
+            or "duty" in msg_lower
+            or "checklist" in msg_lower
+        ):
             return "volunteer"
-        if "sustainability" in msg_lower or "recycle" in msg_lower or "energy" in msg_lower or "carbon" in msg_lower:
+        if (
+            "sustainability" in msg_lower
+            or "recycle" in msg_lower
+            or "energy" in msg_lower
+            or "carbon" in msg_lower
+        ):
             return "sustainability"
         return "general"
 
     def _generate_fallback_json(self, message: str, role: str) -> Dict[str, Any]:
         msg_lower = message.lower()
         intent = self._classify_intent(message)
-        
+
         reply = f"StadiumOS Operations Engine ({role} mode): Processed input query successfully."
         tool_calls = []
         suggested_actions = []
@@ -143,37 +169,80 @@ class AIService:
 
         if "gate" in msg_lower or "entrance" in msg_lower:
             reply = KNOWLEDGE_BASE["gates"]["text"]
-            tool_calls = [{"function_name": KNOWLEDGE_BASE["gates"]["tool"], "arguments": KNOWLEDGE_BASE["gates"]["args"]}]
+            tool_calls = [
+                {
+                    "function_name": KNOWLEDGE_BASE["gates"]["tool"],
+                    "arguments": KNOWLEDGE_BASE["gates"]["args"],
+                }
+            ]
             suggested_actions = ["Locate Gate D", "View Map"]
             confidence = 0.95
-        elif "wheelchair" in msg_lower or "accessibility" in msg_lower or "elevator" in msg_lower:
+        elif (
+            "wheelchair" in msg_lower
+            or "accessibility" in msg_lower
+            or "elevator" in msg_lower
+        ):
             reply = KNOWLEDGE_BASE["routes"]["text"]
-            tool_calls = [{"function_name": KNOWLEDGE_BASE["routes"]["tool"], "arguments": KNOWLEDGE_BASE["routes"]["args"]}]
+            tool_calls = [
+                {
+                    "function_name": KNOWLEDGE_BASE["routes"]["tool"],
+                    "arguments": KNOWLEDGE_BASE["routes"]["args"],
+                }
+            ]
             suggested_actions = ["Request Escalator Assistance", "Open Navigation Path"]
             confidence = 0.95
         elif "emergency" in msg_lower or "evacuate" in msg_lower:
             reply = KNOWLEDGE_BASE["emergency"]["text"]
-            tool_calls = [{"function_name": KNOWLEDGE_BASE["emergency"]["tool"], "arguments": KNOWLEDGE_BASE["emergency"]["args"]}]
+            tool_calls = [
+                {
+                    "function_name": KNOWLEDGE_BASE["emergency"]["tool"],
+                    "arguments": KNOWLEDGE_BASE["emergency"]["args"],
+                }
+            ]
             suggested_actions = ["Show Evacuation Exit", "Contact Dispatcher"]
             confidence = 0.98
-        elif "sustainability" in msg_lower or "carbon" in msg_lower or "recycle" in msg_lower:
+        elif (
+            "sustainability" in msg_lower
+            or "carbon" in msg_lower
+            or "recycle" in msg_lower
+        ):
             reply = KNOWLEDGE_BASE["sustainability"]["text"]
-            tool_calls = [{"function_name": KNOWLEDGE_BASE["sustainability"]["tool"], "arguments": KNOWLEDGE_BASE["sustainability"]["args"]}]
+            tool_calls = [
+                {
+                    "function_name": KNOWLEDGE_BASE["sustainability"]["tool"],
+                    "arguments": KNOWLEDGE_BASE["sustainability"]["args"],
+                }
+            ]
             suggested_actions = ["Show Carbon Summary", "Recycling Guide"]
             confidence = 0.90
         elif "volunteer" in msg_lower or "shift" in msg_lower:
             reply = KNOWLEDGE_BASE["volunteer"]["text"]
-            tool_calls = [{"function_name": KNOWLEDGE_BASE["volunteer"]["tool"], "arguments": KNOWLEDGE_BASE["volunteer"]["args"]}]
+            tool_calls = [
+                {
+                    "function_name": KNOWLEDGE_BASE["volunteer"]["tool"],
+                    "arguments": KNOWLEDGE_BASE["volunteer"]["args"],
+                }
+            ]
             suggested_actions = ["Check Volunteer Tasks", "Shift Roster"]
             confidence = 0.92
         elif "capacity" in msg_lower or "attendance" in msg_lower:
             reply = KNOWLEDGE_BASE["capacity"]["text"]
-            tool_calls = [{"function_name": KNOWLEDGE_BASE["capacity"]["tool"], "arguments": KNOWLEDGE_BASE["capacity"]["args"]}]
+            tool_calls = [
+                {
+                    "function_name": KNOWLEDGE_BASE["capacity"]["tool"],
+                    "arguments": KNOWLEDGE_BASE["capacity"]["args"],
+                }
+            ]
             suggested_actions = ["View Sector Congestion", "Refresh Stats"]
             confidence = 0.90
         else:
             # Default response
-            tool_calls = [{"function_name": "process_general_query", "arguments": {"query": message}}]
+            tool_calls = [
+                {
+                    "function_name": "process_general_query",
+                    "arguments": {"query": message},
+                }
+            ]
             suggested_actions = ["Ask Operations Desk", "Read Stadium FAQs"]
 
         return {
@@ -184,7 +253,7 @@ class AIService:
             "tool_calls": tool_calls,
             "suggested_actions": suggested_actions,
             "flagged": False,
-            "flag_reason": None
+            "flag_reason": None,
         }
 
     async def get_chat_response(self, request: ChatRequest) -> ChatResponse:
@@ -194,7 +263,7 @@ class AIService:
                 reply="Empty query received. Please ask a valid question.",
                 language=request.language or "en",
                 confidence_score=0.0,
-                flagged=False
+                flagged=False,
             )
 
         if self._detect_prompt_injection(request.message):
@@ -205,12 +274,17 @@ class AIService:
                 confidence_score=0.0,
                 flagged=True,
                 flag_reason="Potential prompt injection attempt.",
-                suggested_actions=["Rephrase the question", "Contact operations desk if this is a mistake"]
+                suggested_actions=[
+                    "Rephrase the question",
+                    "Contact operations desk if this is a mistake",
+                ],
             )
 
         history = self._get_conversation_history(request.conversation_id)
-        system_instruction = SYSTEM_PROMPTS.get(request.user_role, SYSTEM_PROMPTS["spectator"])
-        
+        system_instruction = SYSTEM_PROMPTS.get(
+            request.user_role, SYSTEM_PROMPTS["spectator"]
+        )
+
         # Enforce structured JSON schema prompts
         schema_instruction = (
             "\nOutput must be a valid JSON object matching the following fields exactly, with no additional text or formatting:\n"
@@ -225,22 +299,24 @@ class AIService:
             '  "flag_reason": null\n'
             "}"
         )
-        
+
         prompt_with_context = f"System: {system_instruction}{schema_instruction}\n"
         for h in history:
             prompt_with_context += f"{h['role'].capitalize()}: {h['content']}\n"
         prompt_with_context += f"User: {request.message}\nAssistant:"
 
         response_data = None
-        
+
         if self.api_key_valid:
             try:
                 # Require JSON format from Gemini
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                model = genai.GenerativeModel("gemini-1.5-flash")
                 generation_config = genai.GenerationConfig(
                     response_mime_type="application/json"
                 )
-                response = model.generate_content(prompt_with_context, generation_config=generation_config)
+                response = model.generate_content(
+                    prompt_with_context, generation_config=generation_config
+                )
                 if response and response.text:
                     parsed = json.loads(response.text.strip())
                     # Validate keys are present
@@ -251,11 +327,15 @@ class AIService:
 
         if response_data is None:
             # Rule fallback
-            response_data = self._generate_fallback_json(request.message, request.user_role)
+            response_data = self._generate_fallback_json(
+                request.message, request.user_role
+            )
 
         if request.conversation_id:
             self._save_conversation(request.conversation_id, "user", request.message)
-            self._save_conversation(request.conversation_id, "assistant", response_data["reply"])
+            self._save_conversation(
+                request.conversation_id, "assistant", response_data["reply"]
+            )
 
         return ChatResponse(
             reply=response_data["reply"],
@@ -265,10 +345,12 @@ class AIService:
             flag_reason=response_data.get("flag_reason"),
             suggested_actions=response_data.get("suggested_actions", []),
             intent=response_data.get("intent", "general"),
-            tool_calls=response_data.get("tool_calls", [])
+            tool_calls=response_data.get("tool_calls", []),
         )
 
-    async def generate_operational_report(self, report_type: str, stats: dict) -> Tuple[str, float]:
+    async def generate_operational_report(
+        self, report_type: str, stats: dict
+    ) -> Tuple[str, float]:
         prompt = (
             f"Generate a professional, structured operational report for FIFA World Cup 2026.\n"
             f"Report Type: {report_type}\n"
@@ -276,10 +358,10 @@ class AIService:
             f"Provide sections: 1. Executive Summary, 2. Key Operational Metrics, 3. Critical Anomalies/Incidents, "
             f"4. AI Optimization Recommendations."
         )
-        
+
         if self.api_key_valid:
             try:
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                model = genai.GenerativeModel("gemini-1.5-flash")
                 response = model.generate_content(prompt)
                 if response and response.text:
                     return response.text.strip(), 0.98
@@ -287,7 +369,10 @@ class AIService:
                 logger.error(f"Failed to generate report using Gemini: {e}")
 
         # Fallback operational report
-        generated_time = stats.get('generated_at') or datetime.datetime.now(datetime.timezone.utc).isoformat()
+        generated_time = (
+            stats.get("generated_at")
+            or datetime.datetime.now(datetime.timezone.utc).isoformat()
+        )
         fallback_report = f"""# StadiumOS AI Operational Report ({report_type.upper()})
 Generated on: {generated_time}
 
@@ -312,5 +397,6 @@ This report analyzes World Cup 2026 stadium operations. Operational efficiency w
 3. **Power Scaling**: Power down non-critical display systems in Sponsor lounges starting 45 minutes after match conclusion.
 """
         return fallback_report, 0.90
+
 
 ai_service = AIService()

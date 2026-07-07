@@ -3,6 +3,7 @@ from sqlalchemy import String, Integer, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from app.core.database import Base
 
+
 class CrowdAlert(Base):
     __tablename__ = "crowd_alerts"
 
@@ -12,4 +13,6 @@ class CrowdAlert(Base):
     spectator_count: Mapped[int] = mapped_column(Integer)
     capacity: Mapped[int] = mapped_column(Integer)
     message: Mapped[str] = mapped_column(String(500), nullable=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc)
+    )

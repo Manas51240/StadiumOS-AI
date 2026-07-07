@@ -6,10 +6,10 @@ from app.features.assistant.services.ai_service import ai_service
 
 router = APIRouter()
 
+
 @router.post("/chat", response_model=ChatResponse)
 async def chat_with_assistant_route(
-    request: ChatRequest,
-    current_user: UserDTO = Depends(get_current_user)
+    request: ChatRequest, current_user: UserDTO = Depends(get_current_user)
 ):
     try:
         # Enforce authenticated user's role
@@ -18,5 +18,5 @@ async def chat_with_assistant_route(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"AI assistant router error: {str(e)}"
+            detail=f"AI assistant router error: {str(e)}",
         )

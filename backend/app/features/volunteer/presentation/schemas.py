@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 import datetime
 
+
 class VolunteerTaskCreateSchema(BaseModel):
     title: str = Field(..., min_length=2)
     description: str = Field(..., min_length=3)
@@ -11,6 +12,7 @@ class VolunteerTaskCreateSchema(BaseModel):
     sector: str
     shift_start: datetime.datetime
     shift_end: datetime.datetime
+
 
 class VolunteerTaskUpdateSchema(BaseModel):
     status: Optional[str] = None

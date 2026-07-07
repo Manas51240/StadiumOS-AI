@@ -7,6 +7,7 @@ from app.features.crowd.domain.entities import CrowdAlertEntity
 from app.features.crowd.domain.repository import CrowdRepository
 from app.features.crowd.data.models import CrowdAlert
 
+
 class SQLCrowdRepository(CrowdRepository):
     def __init__(self, db: AsyncSession):
         self.db = db
@@ -19,7 +20,7 @@ class SQLCrowdRepository(CrowdRepository):
             spectator_count=model.spectator_count,
             capacity=model.capacity,
             message=model.message,
-            created_at=model.created_at
+            created_at=model.created_at,
         )
 
     async def get_all_alerts(self) -> List[CrowdAlertEntity]:
@@ -35,7 +36,8 @@ class SQLCrowdRepository(CrowdRepository):
             spectator_count=entity.spectator_count,
             capacity=entity.capacity,
             message=entity.message,
-            created_at=entity.created_at or datetime.datetime.now(datetime.timezone.utc)
+            created_at=entity.created_at
+            or datetime.datetime.now(datetime.timezone.utc),
         )
         self.db.add(model)
         await self.db.flush()

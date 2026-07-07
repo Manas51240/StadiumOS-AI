@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional
 from app.features.emergency.domain.entities import IncidentEntity
 
+
 class IncidentRepository(ABC):
     @abstractmethod
     async def get_all_incidents(self) -> List[IncidentEntity]:

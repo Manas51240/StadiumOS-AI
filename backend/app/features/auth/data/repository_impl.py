@@ -7,6 +7,7 @@ from app.features.auth.domain.entities import UserEntity
 from app.features.auth.domain.repository import AuthRepository
 from app.features.auth.data.models import User
 
+
 class SQLAuthRepository(AuthRepository):
     def __init__(self, db: AsyncSession):
         self.db = db
@@ -19,7 +20,7 @@ class SQLAuthRepository(AuthRepository):
             full_name=model.full_name,
             role=model.role,
             is_active=model.is_active,
-            created_at=model.created_at
+            created_at=model.created_at,
         )
 
     async def get_by_email(self, email: str) -> Optional[UserEntity]:
@@ -49,10 +50,11 @@ class SQLAuthRepository(AuthRepository):
                 full_name=entity.full_name,
                 role=entity.role,
                 is_active=entity.is_active,
-                created_at=entity.created_at or datetime.datetime.now(datetime.timezone.utc)
+                created_at=entity.created_at
+                or datetime.datetime.now(datetime.timezone.utc),
             )
             self.db.add(model)
-            
+
         await self.db.flush()
         entity.id = model.id
         entity.created_at = model.created_at

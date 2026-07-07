@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional
 from app.features.navigation.domain.entities import NavigationNodeEntity
 
+
 class NavigationRepository(ABC):
     @abstractmethod
     async def get_all_nodes(self) -> List[NavigationNodeEntity]:

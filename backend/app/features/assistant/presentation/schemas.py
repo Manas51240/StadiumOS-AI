@@ -1,11 +1,13 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 
+
 class ChatRequest(BaseModel):
     message: str = Field(..., max_length=1000)
     language: Optional[str] = "en"
     conversation_id: Optional[str] = None
     user_role: Optional[str] = "spectator"
+
 
 class ChatResponse(BaseModel):
     reply: str

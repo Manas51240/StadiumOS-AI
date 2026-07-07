@@ -6,6 +6,7 @@ from app.features.navigation.domain.entities import NavigationNodeEntity
 from app.features.navigation.domain.repository import NavigationRepository
 from app.features.navigation.data.models import NavigationNode
 
+
 class SQLNavigationRepository(NavigationRepository):
     def __init__(self, db: AsyncSession):
         self.db = db
@@ -19,7 +20,7 @@ class SQLNavigationRepository(NavigationRepository):
             lat=model.lat,
             lng=model.lng,
             sector=model.sector,
-            details=model.details
+            details=model.details,
         )
 
     async def get_all_nodes(self) -> List[NavigationNodeEntity]:
@@ -27,13 +28,17 @@ class SQLNavigationRepository(NavigationRepository):
         return [self._to_entity(m) for m in res.scalars().all()]
 
     async def get_node_by_id(self, node_id: int) -> Optional[NavigationNodeEntity]:
-        res = await self.db.execute(select(NavigationNode).where(NavigationNode.id == node_id))
+        res = await self.db.execute(
+            select(NavigationNode).where(NavigationNode.id == node_id)
+        )
         model = res.scalars().first()
         return self._to_entity(model) if model else None
 
     async def save_node(self, entity: NavigationNodeEntity) -> NavigationNodeEntity:
         if entity.id:
-            res = await self.db.execute(select(NavigationNode).where(NavigationNode.id == entity.id))
+            res = await self.db.execute(
+                select(NavigationNode).where(NavigationNode.id == entity.id)
+            )
             model = res.scalars().first()
             if model:
                 model.name = entity.name
@@ -51,10 +56,10 @@ class SQLNavigationRepository(NavigationRepository):
                 lat=entity.lat,
                 lng=entity.lng,
                 sector=entity.sector,
-                details=entity.details
+                details=entity.details,
             )
             self.db.add(model)
-            
+
         await self.db.flush()
         entity.id = model.id
         return entity

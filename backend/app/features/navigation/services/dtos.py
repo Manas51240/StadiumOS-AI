@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional, List
 
+
 class NavigationNodeDTO(BaseModel):
     id: int
     name: str
@@ -14,11 +15,13 @@ class NavigationNodeDTO(BaseModel):
     class Config:
         from_attributes = True
 
+
 class WaypointDTO(BaseModel):
     name: str
     lat: float
     lng: float
     type: str
+
 
 class RouteDTO(BaseModel):
     start: str

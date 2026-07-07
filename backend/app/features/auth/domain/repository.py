@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 from app.features.auth.domain.entities import UserEntity
 
+
 class AuthRepository(ABC):
     @abstractmethod
     async def get_by_email(self, email: str) -> Optional[UserEntity]:

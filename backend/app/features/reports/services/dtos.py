@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 import datetime
 
+
 class OperationReportDTO(BaseModel):
     id: int
     title: str

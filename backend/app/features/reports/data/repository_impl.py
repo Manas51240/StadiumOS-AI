@@ -7,6 +7,7 @@ from app.features.reports.domain.entities import OperationReportEntity
 from app.features.reports.domain.repository import ReportsRepository
 from app.features.reports.data.models import OperationReport
 
+
 class SQLReportsRepository(ReportsRepository):
     def __init__(self, db: AsyncSession):
         self.db = db
@@ -19,7 +20,7 @@ class SQLReportsRepository(ReportsRepository):
             report_type=model.report_type,
             content=model.content,
             confidence_score=model.confidence_score,
-            created_at=model.created_at
+            created_at=model.created_at,
         )
 
     async def get_all_reports(self) -> List[OperationReportEntity]:
@@ -35,7 +36,8 @@ class SQLReportsRepository(ReportsRepository):
             report_type=entity.report_type,
             content=entity.content,
             confidence_score=entity.confidence_score,
-            created_at=entity.created_at or datetime.datetime.now(datetime.timezone.utc)
+            created_at=entity.created_at
+            or datetime.datetime.now(datetime.timezone.utc),
         )
         self.db.add(model)
         await self.db.flush()
