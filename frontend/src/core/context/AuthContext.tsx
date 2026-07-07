@@ -1,15 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-export interface UserProfile {
-  id: number;
-  email: string;
-  full_name: string | null;
-  role: 'spectator' | 'volunteer' | 'security' | 'organizer';
-  is_active: boolean;
-  created_at: string;
-}
+import { UserProfile } from '../types';
+import { authService } from '../../services/api';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -23,44 +16,32 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-let API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-if (typeof window !== 'undefined') {
-  const host = window.location.hostname;
-  if (host.includes('stadium-os-frontend')) {
-    API_URL = window.location.origin.replace('stadium-os-frontend', 'stadium-os-backend');
+const getApiUrl = () => {
+  let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  if (typeof window !== 'undefined' && window.location.hostname.includes('stadium-os-frontend')) {
+    url = window.location.origin.replace('stadium-os-frontend', 'stadium-os-backend');
   }
-}
+  return url;
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const API_URL = getApiUrl();
 
   const autoLoginOrganizer = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/v1/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email: 'organizer@fifa.com', password: 'strongpassword123' })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        localStorage.setItem('stadium_token', data.access_token);
-        setToken(data.access_token);
-        await fetchProfile(data.access_token);
-      } else {
-        setLoading(false);
-      }
+      const data = await authService.login({ email: 'organizer@fifa.com', password: 'strongpassword123' });
+      localStorage.setItem('stadium_token', data.access_token);
+      setToken(data.access_token);
+      await fetchProfile(data.access_token);
     } catch {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    // Re-hydrate auth state
     const savedToken = localStorage.getItem('stadium_token');
     if (savedToken) {
       setToken(savedToken);
@@ -73,13 +54,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchProfile = async (authToken: string) => {
     try {
       const res = await fetch(`${API_URL}/api/v1/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${authToken}`
-        }
+        headers: { Authorization: `Bearer ${authToken}` }
       });
       if (res.ok) {
-        const data = await res.json();
-        setUser(data);
+        setUser(await res.json());
       } else {
         logout();
       }
@@ -92,21 +70,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const res = await fetch(`${API_URL}/api/v1/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        localStorage.setItem('stadium_token', data.access_token);
-        setToken(data.access_token);
-        await fetchProfile(data.access_token);
-        return true;
-      }
-      return false;
+      const data = await authService.login({ email, password });
+      localStorage.setItem('stadium_token', data.access_token);
+      setToken(data.access_token);
+      await fetchProfile(data.access_token);
+      return true;
     } catch {
       return false;
     }
@@ -114,14 +82,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signup = async (email: string, password: string, full_name: string, role: string): Promise<boolean> => {
     try {
-      const res = await fetch(`${API_URL}/api/v1/auth/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password, full_name, role })
-      });
-      return res.ok;
+      await authService.signup({ email, password, full_name, role });
+      return true;
     } catch {
       return false;
     }
@@ -140,22 +102,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     };
-    
-    const res = await fetch(`${API_URL}${endpoint}`, {
-      ...options,
-      headers
-    });
-    
+    const res = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
     if (res.status === 401) {
       logout();
       throw new Error('Unauthorized');
     }
-    
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       throw new Error(errorData.detail || 'Request failed');
     }
-    
     return res.json();
   };
 
@@ -168,8 +123,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
 }

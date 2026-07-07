@@ -43,29 +43,13 @@ export default function AuthForm({
         </h1>
 
         {errorMsg && (
-          <div style={{
-            background: 'rgba(239, 68, 68, 0.15)',
-            border: '1px solid var(--color-danger)',
-            padding: '10px',
-            borderRadius: '6px',
-            marginBottom: '16px',
-            fontSize: '0.85rem',
-            color: 'var(--color-danger)'
-          }}>
+          <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid var(--color-danger)', padding: '10px', borderRadius: '6px', marginBottom: '16px', fontSize: '0.85rem', color: 'var(--color-danger)' }}>
             {errorMsg}
           </div>
         )}
 
         {successMsg && (
-          <div style={{
-            background: 'rgba(16, 185, 129, 0.15)',
-            border: '1px solid var(--color-primary)',
-            padding: '10px',
-            borderRadius: '6px',
-            marginBottom: '16px',
-            fontSize: '0.85rem',
-            color: 'var(--color-primary)'
-          }}>
+          <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid var(--color-primary)', padding: '10px', borderRadius: '6px', marginBottom: '16px', fontSize: '0.85rem', color: 'var(--color-primary)' }}>
             {successMsg}
           </div>
         )}
