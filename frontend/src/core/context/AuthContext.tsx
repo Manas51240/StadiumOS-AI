@@ -23,7 +23,14 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+let API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+if (typeof window !== 'undefined') {
+  const host = window.location.hostname;
+  if (host.includes('stadium-os-frontend')) {
+    API_URL = window.location.origin.replace('stadium-os-frontend', 'stadium-os-backend');
+  }
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
