@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/core/context/AuthContext';
 import { useAccessibility } from '@/core/context/AccessibilityContext';
 import { useRouter } from 'next/navigation';
@@ -41,7 +41,7 @@ export default function CommandCenter() {
     }
   }, [user, loading, router]);
 
-  const loadDashboard = async () => {
+  const loadDashboard = useCallback(async () => {
     try {
       const statsData = await getStats();
       setStats(statsData);
@@ -50,13 +50,13 @@ export default function CommandCenter() {
     } catch (err: any) {
       setErrorMsg(`Failed to query dashboard: ${err.message}`);
     }
-  };
+  }, [getStats, getReports]);
 
   useEffect(() => {
     if (user) {
       loadDashboard();
     }
-  }, [user]);
+  }, [user, loadDashboard]);
 
   const handleBroadcastAlert = async (e: React.FormEvent) => {
     e.preventDefault();

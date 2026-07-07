@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/core/context/AuthContext';
 import { useAccessibility } from '@/core/context/AccessibilityContext';
 import { useRouter } from 'next/navigation';
@@ -40,7 +40,7 @@ export default function NavigationPage() {
         .then(data => setNodes(data))
         .catch(err => setErrorMsg(`Failed to load nodes: ${err.message}`));
     }
-  }, [user]);
+  }, [user, getNodes]);
 
   // Calculate route when start/end/modes change
   useEffect(() => {
@@ -64,7 +64,7 @@ export default function NavigationPage() {
     } else {
       setRoute(null);
     }
-  }, [selectedStart, selectedEnd, accessibilityRequired, avoidCongested]);
+  }, [selectedStart, selectedEnd, accessibilityRequired, avoidCongested, getRoute, announce]);
 
   if (loading || !user) {
     return (

@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import { VolunteerTaskDTO } from '../types';
+import { useCallback } from 'react';
 
 export interface CreateTaskPayload {
   title: string;
@@ -19,23 +20,23 @@ export interface UpdateTaskPayload {
 export function useVolunteerTasks() {
   const { apiFetch } = useAuth();
 
-  const getTasks = async (): Promise<VolunteerTaskDTO[]> => {
+  const getTasks = useCallback(async (): Promise<VolunteerTaskDTO[]> => {
     return apiFetch('/api/v1/volunteer/tasks');
-  };
+  }, [apiFetch]);
 
-  const createTask = async (payload: CreateTaskPayload): Promise<VolunteerTaskDTO> => {
+  const createTask = useCallback(async (payload: CreateTaskPayload): Promise<VolunteerTaskDTO> => {
     return apiFetch('/api/v1/volunteer/tasks', {
       method: 'POST',
       body: JSON.stringify(payload)
     });
-  };
+  }, [apiFetch]);
 
-  const updateTask = async (taskId: number, payload: UpdateTaskPayload): Promise<VolunteerTaskDTO> => {
+  const updateTask = useCallback(async (taskId: number, payload: UpdateTaskPayload): Promise<VolunteerTaskDTO> => {
     return apiFetch(`/api/v1/volunteer/tasks/${taskId}`, {
       method: 'PUT',
       body: JSON.stringify(payload)
     });
-  };
+  }, [apiFetch]);
 
   return {
     getTasks,

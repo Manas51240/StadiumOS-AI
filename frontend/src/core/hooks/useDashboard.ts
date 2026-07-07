@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import { OperationReportDTO, CrowdAlertDTO } from '../types';
+import { useCallback } from 'react';
 
 export interface CommandCenterStats {
   crowd_safety_index: string;
@@ -13,15 +14,15 @@ export interface CommandCenterStats {
 export function useDashboard() {
   const { apiFetch } = useAuth();
 
-  const getStats = async (): Promise<CommandCenterStats> => {
+  const getStats = useCallback(async (): Promise<CommandCenterStats> => {
     return apiFetch('/api/v1/dashboard/stats');
-  };
+  }, [apiFetch]);
 
-  const getReports = async (): Promise<OperationReportDTO[]> => {
+  const getReports = useCallback(async (): Promise<OperationReportDTO[]> => {
     return apiFetch('/api/v1/reports');
-  };
+  }, [apiFetch]);
 
-  const createCrowdAlert = async (payload: {
+  const createCrowdAlert = useCallback(async (payload: {
     sector: string;
     congestion_level: string;
     spectator_count: number;
@@ -32,13 +33,13 @@ export function useDashboard() {
       method: 'POST',
       body: JSON.stringify(payload)
     });
-  };
+  }, [apiFetch]);
 
-  const generateReport = async (reportType: string): Promise<OperationReportDTO> => {
+  const generateReport = useCallback(async (reportType: string): Promise<OperationReportDTO> => {
     return apiFetch(`/api/v1/reports/generate?report_type=${reportType}`, {
       method: 'POST'
     });
-  };
+  }, [apiFetch]);
 
   return {
     getStats,

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
@@ -23,9 +23,11 @@ admin_access = RoleChecker(allowed_roles=["organizer"])
 
 @router.get("/nodes", response_model=List[NavigationNodeDTO])
 async def get_nodes_route(
+    response: Response,
     service: NavigationService = Depends(get_navigation_service),
     current_user: UserDTO = Depends(get_current_user),
 ):
+    response.headers["Cache-Control"] = "private, max-age=300"
     return await service.list_nodes()
 
 

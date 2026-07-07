@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/core/context/AuthContext';
 import { useAccessibility } from '@/core/context/AccessibilityContext';
 import { useRouter } from 'next/navigation';
@@ -34,20 +34,20 @@ export default function EmergencyCenter() {
     }
   }, [user, loading, router]);
 
-  const loadIncidents = async () => {
+  const loadIncidents = useCallback(async () => {
     try {
       const data = await getIncidents();
       setIncidents(data);
     } catch (err: any) {
       setErrorMsg(`Failed to query incident logs: ${err.message}`);
     }
-  };
+  }, [getIncidents]);
 
   useEffect(() => {
     if (user) {
       loadIncidents();
     }
-  }, [user]);
+  }, [user, loadIncidents]);
 
   const handleReport = async (e: React.FormEvent) => {
     e.preventDefault();

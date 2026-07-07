@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { UserProfile } from '../types';
 import { authService } from '../../services/api';
 
@@ -30,28 +30,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const API_URL = getApiUrl();
 
-  const autoLoginOrganizer = async () => {
-    try {
-      const data = await authService.login({ email: 'organizer@fifa.com', password: 'strongpassword123' });
-      localStorage.setItem('stadium_token', data.access_token);
-      setToken(data.access_token);
-      await fetchProfile(data.access_token);
-    } catch {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const savedToken = localStorage.getItem('stadium_token');
-    if (savedToken) {
-      setToken(savedToken);
-      fetchProfile(savedToken);
-    } else {
-      autoLoginOrganizer();
-    }
+  const logout = useCallback(() => {
+    localStorage.removeItem('stadium_token');
+    setToken(null);
+    setUser(null);
+    setLoading(false);
   }, []);
 
-  const fetchProfile = async (authToken: string) => {
+  const fetchProfile = useCallback(async (authToken: string) => {
     try {
       const res = await fetch(`${API_URL}/api/v1/auth/me`, {
         headers: { Authorization: `Bearer ${authToken}` }
@@ -66,7 +52,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_URL, logout]);
+
+  const autoLoginOrganizer = useCallback(async () => {
+    try {
+      const data = await authService.login({ email: 'organizer@fifa.com', password: 'strongpassword123' });
+      localStorage.setItem('stadium_token', data.access_token);
+      setToken(data.access_token);
+      await fetchProfile(data.access_token);
+    } catch {
+      setLoading(false);
+    }
+  }, [fetchProfile]);
+
+  useEffect(() => {
+    const savedToken = localStorage.getItem('stadium_token');
+    if (savedToken) {
+      setToken(savedToken);
+      fetchProfile(savedToken);
+    } else {
+      autoLoginOrganizer();
+    }
+  }, [fetchProfile, autoLoginOrganizer]);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -89,12 +96,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('stadium_token');
-    setToken(null);
-    setUser(null);
-    setLoading(false);
-  };
 
   const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     const headers = {

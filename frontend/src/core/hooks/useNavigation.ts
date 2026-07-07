@@ -1,14 +1,15 @@
 import { useAuth } from '../context/AuthContext';
 import { NavigationNodeDTO, RouteDTO } from '../types';
+import { useCallback } from 'react';
 
 export function useNavigationPlanner() {
   const { apiFetch } = useAuth();
 
-  const getNodes = async (): Promise<NavigationNodeDTO[]> => {
+  const getNodes = useCallback(async (): Promise<NavigationNodeDTO[]> => {
     return apiFetch('/api/v1/navigation/nodes');
-  };
+  }, [apiFetch]);
 
-  const getRoute = async (
+  const getRoute = useCallback(async (
     startId: number,
     endId: number,
     accessibilityRequired: boolean,
@@ -16,7 +17,7 @@ export function useNavigationPlanner() {
   ): Promise<RouteDTO> => {
     const url = `/api/v1/navigation/route?start_id=${startId}&end_id=${endId}&accessibility_required=${accessibilityRequired}&avoid_congested_sectors=${avoidCongested}`;
     return apiFetch(url);
-  };
+  }, [apiFetch]);
 
   return {
     getNodes,

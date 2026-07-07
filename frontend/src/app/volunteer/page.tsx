@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/core/context/AuthContext';
 import { useAccessibility } from '@/core/context/AccessibilityContext';
 import { useRouter } from 'next/navigation';
@@ -34,20 +34,20 @@ export default function VolunteerHub() {
     }
   }, [user, loading, router]);
 
-  const loadTasks = async () => {
+  const loadTasks = useCallback(async () => {
     try {
       const data = await getTasks();
       setTasks(data);
     } catch (err: any) {
       setErrorMsg(`Failed to query volunteer tasks: ${err.message}`);
     }
-  };
+  }, [getTasks]);
 
   useEffect(() => {
     if (user) {
       loadTasks();
     }
-  }, [user]);
+  }, [user, loadTasks]);
 
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
