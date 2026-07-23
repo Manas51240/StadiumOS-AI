@@ -7,15 +7,21 @@ backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'bac
 if backend_dir not in sys.path:
     sys.path.insert(0, backend_dir)
 
-from app.main import app
-
-# Ensure database tables and seed users are initialized on Vercel serverless load
-async def _init_db():
+try:
+    from app.main import app
     from app.core.database import engine, Base, SessionLocal
     from app.features.auth.data.models import User
     from app.core.security import get_password_hash
-    from sqlalchemy import select
+except ImportError:
+    from backend.app.main import app  # type: ignore
+    from backend.app.core.database import engine, Base, SessionLocal  # type: ignore
+    from backend.app.features.auth.data.models import User  # type: ignore
+    from backend.app.core.security import get_password_hash  # type: ignore
 
+from sqlalchemy import select
+
+# Ensure database tables and seed users are initialized on Vercel serverless load
+async def _init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
