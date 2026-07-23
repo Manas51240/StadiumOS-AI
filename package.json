@@ -3,11 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "npm --prefix frontend run build",
-    "start": "npm --prefix frontend run start",
-    "dev": "npm --prefix frontend run dev",
-    "lint": "npm --prefix frontend run lint",
-    "test": "npm --prefix frontend test"
+    "build": "cd frontend && npm install && npm run build",
+    "start": "cd frontend && npm run start",
+    "dev": "cd frontend && npm run dev",
+    "lint": "cd frontend && npm run lint",
+    "test": "cd frontend && npm test"
+  },
+  "dependencies": {
+    "@types/dompurify": "^3.0.5",
+    "dompurify": "^3.4.11"
   },
   "devDependencies": {
     "jest": "^29.7.0"
