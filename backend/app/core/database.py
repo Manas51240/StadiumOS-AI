@@ -24,7 +24,19 @@ class Base(DeclarativeBase):
     pass
 
 
+_db_initialized = False
+
+
 async def get_db():
+    global _db_initialized
+    if not _db_initialized:
+        try:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            _db_initialized = True
+        except Exception:
+            pass
+
     async with SessionLocal() as session:
         try:
             yield session
