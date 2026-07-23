@@ -65,6 +65,22 @@ async def lifespan(app: FastAPI):
             session.add(db_user)
             await session.commit()
 
+        # Seed Manas Deshmukh user if not exists
+        stmt_manas = select(User).where(User.email == "manasdeshmukh512@gmail.com")
+        res_manas = await session.execute(stmt_manas)
+        user_manas = res_manas.scalar_one_or_none()
+        if not user_manas:
+            logger.info("Seeding user: manasdeshmukh512@gmail.com")
+            db_manas = User(
+                email="manasdeshmukh512@gmail.com",
+                hashed_password=get_password_hash("strongpassword123"),
+                full_name="Manas Deshmukh",
+                role="organizer",
+                is_active=True,
+            )
+            session.add(db_manas)
+            await session.commit()
+
     logger.info("Database initialized and seeded successfully.")
     yield
     logger.info("Shutting down resources...")
