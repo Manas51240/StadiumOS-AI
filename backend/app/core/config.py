@@ -8,7 +8,11 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = "supersecretkeyforstadiumosai2026worldcup"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
-    DATABASE_URL: str = "sqlite+aiosqlite:///./stadium_os.db"
+    DATABASE_URL: str = (
+        "sqlite+aiosqlite:////tmp/stadium_os.db"
+        if os.getenv("VERCEL") or os.getenv("VERCEL_ENV")
+        else "sqlite+aiosqlite:///./stadium_os.db"
+    )
 
     # AI Config
     GEMINI_API_KEY: str = "mock-key-for-stadium-os"
