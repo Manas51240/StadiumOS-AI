@@ -16,13 +16,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const getApiUrl = () => {
-  let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-  if (typeof window !== 'undefined' && window.location.hostname.includes('stadium-os-frontend')) {
-    url = window.location.origin.replace('stadium-os-frontend', 'stadium-os-backend');
-  }
-  return url;
-};
+import { getApiUrl } from '../../services/client';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);

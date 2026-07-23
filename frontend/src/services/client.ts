@@ -1,12 +1,17 @@
 export const getApiUrl = () => {
-  let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
   if (typeof window !== 'undefined') {
     const host = window.location.hostname;
     if (host.includes('stadium-os-frontend')) {
-      url = window.location.origin.replace('stadium-os-frontend', 'stadium-os-backend');
+      return window.location.origin.replace('stadium-os-frontend', 'stadium-os-backend');
+    }
+    if (!host.includes('localhost') && !host.includes('127.0.0.1')) {
+      return '';
     }
   }
-  return url;
+  return 'http://localhost:8000';
 };
 
 export const getAuthHeaders = (): Record<string, string> => {
