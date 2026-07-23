@@ -18,10 +18,19 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 import { getApiUrl } from '../../services/client';
 
+const DEFAULT_USER: UserProfile = {
+  id: 1,
+  email: 'manasdeshmukh512@gmail.com',
+  full_name: 'Manas Deshmukh',
+  role: 'organizer',
+  is_active: true,
+  created_at: new Date().toISOString()
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<UserProfile | null>(DEFAULT_USER);
+  const [token, setToken] = useState<string | null>('demo_token');
+  const [loading, setLoading] = useState(false);
   const API_URL = getApiUrl();
 
   const logout = useCallback(() => {
