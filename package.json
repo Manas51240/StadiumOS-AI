@@ -10,7 +10,6 @@
     "test": "cd frontend && npm test"
   },
   "dependencies": {
-    "@types/dompurify": "^3.0.5",
     "dompurify": "^3.4.11"
   },
   "devDependencies": {
